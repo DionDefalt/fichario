@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fichário — Lista de Tarefas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="board">
+    <header class="board__header">
+      <span class="board__eyebrow">Ficha 01 / Tarefas diárias</span>
+      <h1 class="board__title">Fichário</h1>
+      <p class="board__subtitle">Cada tarefa é uma ficha. Escreve, arquiva, arranca.</p>
+    </header>
+
+    <form class="composer" id="composer">
+      <input
+        type="text"
+        id="taskInput"
+        class="composer__input"
+        placeholder="O que precisa ser feito?"
+        autocomplete="off"
+        maxlength="80"
+      />
+      <button type="submit" class="composer__button">Arquivar</button>
+    </form>
+
+    <nav class="filters" id="filters">
+      <button class="filters__btn is-active" data-filter="all">Todas</button>
+      <button class="filters__btn" data-filter="active">Pendentes</button>
+      <button class="filters__btn" data-filter="completed">Concluídas</button>
+    </nav>
+
+    <ul class="stack" id="taskList" aria-live="polite"></ul>
+
+    <p class="empty-state" id="emptyState" hidden>
+      Nenhuma ficha por aqui ainda. Escreva a primeira tarefa acima.
+    </p>
+
+    <footer class="board__footer">
+      <span id="counter">0 tarefas pendentes</span>
+      <button class="board__clear" id="clearCompleted">Limpar concluídas</button>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
