@@ -1,320 +1,497 @@
 :root {
-  --bg: #14181b;
-  --surface: #1f2529;
-  --surface-raised: #262d32;
-  --ink: #ede9e1;
-  --ink-dim: #9aa3a6;
-  --gold: #e8b94b;
-  --sage: #6b9080;
-  --line: #33393d;
-  --radius: 4px;
+  --papel: #eff3f0;
+  --papel-alt: #ffffff;
+  --linha: #d9e2dc;
+  --tinta: #20302b;
+  --tinta-suave: #5f7268;
+  --marca: #1f6f5c;
+  --marca-clara: #e4f0ec;
+
+  --cat-hortifruti: #6b9b5e;
+  --cat-laticinios: #d9a441;
+  --cat-limpeza: #4f8fbf;
+  --cat-higiene: #c97ba0;
+  --cat-outros: #8b8378;
+
+  --fonte-titulo: 'Baloo 2', system-ui, sans-serif;
+  --fonte-corpo: 'Work Sans', system-ui, sans-serif;
 }
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: 'Inter', sans-serif;
   display: flex;
-  justify-content: center;
-  padding: 48px 20px 80px;
+  flex-direction: column;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-.board {
-  width: 100%;
-  max-width: 560px;
-}
-
-.board__header {
-  margin-bottom: 32px;
-}
-
-.board__eyebrow {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
-.board__title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 42px;
-  font-weight: 700;
-  margin: 8px 0 4px;
-  letter-spacing: -0.01em;
-}
-
-.board__subtitle {
-  color: var(--ink-dim);
-  font-size: 15px;
-  margin: 0;
-}
-
-/* Composer */
-
-.composer {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.composer__input {
+.app {
   flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  color: var(--ink);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.15s ease;
+  padding: 20px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.composer__input:focus-visible {
-  border-color: var(--gold);
+/* --- Cabeçalho --- */
+.cabecalho {
+  margin-bottom: 18px;
 }
 
-.composer__input::placeholder {
-  color: var(--ink-dim);
-}
-
-.composer__button {
-  background: var(--gold);
-  color: #14181b;
-  border: none;
-  border-radius: var(--radius);
-  padding: 0 22px;
-  font-family: 'IBM Plex Mono', monospace;
+.cabecalho h1 {
+  font-family: var(--fonte-titulo);
+  font-size: 24px;
   font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--marca);
+}
+
+.progresso-texto {
   font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: filter 0.15s ease, transform 0.1s ease;
+  color: var(--tinta-suave);
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 
-.composer__button:hover {
-  filter: brightness(1.08);
+.progresso-barra {
+  height: 8px;
+  background: var(--linha);
+  border-radius: 99px;
+  overflow: hidden;
 }
 
-.composer__button:active {
-  transform: scale(0.97);
+.progresso-preenchido {
+  height: 100%;
+  background: var(--marca);
+  width: 0%;
+  border-radius: 99px;
+  transition: width 0.35s ease;
 }
 
-.composer__button:focus-visible,
-.filters__btn:focus-visible,
-.stack__checkbox:focus-visible,
-.stack__delete:focus-visible,
-.board__clear:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-}
-
-/* Filters */
-
-.filters {
+/* --- Filtros de categoria (chips roláveis) --- */
+.filtros {
   display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--line);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.filters__btn {
-  background: none;
-  border: none;
-  color: var(--ink-dim);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 10px 14px;
+.filtros::-webkit-scrollbar { display: none; }
+
+.filtro {
+  flex-shrink: 0;
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 99px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel-alt);
+  color: var(--tinta-suave);
   cursor: pointer;
-  position: relative;
-  top: 1px;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s ease;
 }
 
-.filters__btn:hover {
-  color: var(--ink);
+.filtro-ativo {
+  background: var(--marca);
+  border-color: var(--marca);
+  color: white;
 }
 
-.filters__btn.is-active {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
-}
-
-/* Task stack — each item is an index card with a torn top edge */
-
-.stack {
+/* --- Lista --- */
+.lista {
   list-style: none;
-  margin: 0 0 24px;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
 }
 
-.stack__item {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 16px 16px 14px;
+.mensagem-vazia {
+  text-align: center;
+  color: var(--tinta-suave);
+  font-size: 14px;
+  padding: 40px 20px;
+  display: none;
+}
+
+.item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
-  animation: file-in 0.22s ease;
-}
-
-.stack__item::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background-image: linear-gradient(115deg, transparent 50%, var(--bg) 50%),
-    linear-gradient(65deg, var(--bg) 50%, transparent 50%);
-  background-size: 10px 6px;
-  background-repeat: repeat-x;
-  background-position: top left;
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-
-@keyframes file-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stack__checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  margin-top: 2px;
-  border: 2px solid var(--ink-dim);
-  border-radius: 3px;
-  cursor: pointer;
+  background: var(--papel-alt);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border-left: 5px solid var(--cat-outros);
   position: relative;
+}
+
+.item[data-categoria="hortifruti"] { border-left-color: var(--cat-hortifruti); }
+.item[data-categoria="laticinios"] { border-left-color: var(--cat-laticinios); }
+.item[data-categoria="limpeza"] { border-left-color: var(--cat-limpeza); }
+.item[data-categoria="higiene"] { border-left-color: var(--cat-higiene); }
+.item[data-categoria="outros"] { border-left-color: var(--cat-outros); }
+
+.item-checkbox {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--linha);
   background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: transparent;
 }
 
-.stack__checkbox:checked {
-  border-color: var(--sage);
-  background: var(--sage);
+.item.comprado .item-checkbox {
+  background: var(--marca);
+  border-color: var(--marca);
+  color: white;
 }
 
-.stack__checkbox:checked::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 5px;
-  height: 10px;
-  border: solid var(--surface);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-.stack__text {
+.item-info {
   flex: 1;
+  min-width: 0;
+}
+
+.item-nome {
   font-size: 15px;
-  line-height: 1.4;
+  font-weight: 500;
+  color: var(--tinta);
   word-break: break-word;
 }
 
-.stack__item.is-done .stack__text {
-  color: var(--ink-dim);
+.item.comprado .item-nome {
   text-decoration: line-through;
-  text-decoration-color: var(--sage);
+  color: var(--tinta-suave);
 }
 
-.stack__delete {
-  background: none;
+.item-qtd {
+  display: inline-block;
+  font-size: 11.5px;
+  color: var(--tinta-suave);
+  background: var(--marca-clara);
+  padding: 1px 7px;
+  border-radius: 99px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+.item-excluir {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   border: none;
-  color: var(--ink-dim);
+  background: transparent;
+  color: var(--tinta-suave);
+  font-size: 16px;
   cursor: pointer;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  transition: color 0.15s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stack__delete:hover {
-  color: #d9695f;
-  background: rgba(217, 105, 95, 0.1);
+.item-excluir:active { background: var(--linha); }
+
+/* --- Perto de mim --- */
+.perto-de-mim {
+  background: var(--papel-alt);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--linha);
 }
 
-/* Empty state */
-
-.empty-state {
-  text-align: center;
-  color: var(--ink-dim);
-  font-size: 14px;
-  padding: 32px 16px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  margin-bottom: 24px;
-}
-
-/* Footer */
-
-.board__footer {
+.perto-cabecalho {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: var(--ink-dim);
-  letter-spacing: 0.02em;
 }
 
-.board__clear {
-  background: none;
+.perto-cabecalho h2 {
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  margin: 0;
+  color: var(--marca);
+}
+
+.botao-perto-toggle {
+  font-family: var(--fonte-corpo);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 99px;
   border: none;
-  color: var(--ink-dim);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  background: var(--marca);
+  color: white;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
-.board__clear:hover {
-  color: var(--gold);
+.perto-config {
+  margin-top: 12px;
 }
 
-@media (max-width: 480px) {
-  .board__title {
-    font-size: 32px;
-  }
-  .composer {
-    flex-direction: column;
-  }
-  .composer__button {
-    padding: 12px;
-  }
+.perto-tipos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.tipo-chip {
+  font-family: var(--fonte-corpo);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 99px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta-suave);
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.tipo-chip.tipo-ativo {
+  opacity: 1;
+  border-color: var(--marca);
+  background: var(--marca-clara);
+  color: var(--marca);
+}
+
+.perto-config label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--tinta-suave);
+  margin-bottom: 4px;
+}
+
+.select-raio {
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  padding: 0 10px;
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
+}
+
+.perto-status {
+  font-size: 12.5px;
+  color: var(--tinta-suave);
+  margin: 10px 0 6px;
+  min-height: 16px;
+}
+
+.perto-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.perto-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--papel);
+  border-radius: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--linha);
+  cursor: pointer;
+}
+
+.perto-item:active {
+  background: var(--linha);
+}
+
+.perto-item-proximo {
+  border-color: var(--marca);
+  background: var(--marca-clara);
+}
+
+.perto-item-icone {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.perto-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.perto-item-nome {
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.perto-item-meta {
+  font-size: 11.5px;
+  color: var(--tinta-suave);
+}
+
+.perto-item-ir {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--marca);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* --- Botão de comando de voz --- */
+.botao-voz {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.botao-voz-ouvindo {
+  background: #fdeaea;
+  border-color: #d9534f;
+  animation: pulsar 1s infinite;
+}
+
+@keyframes pulsar {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* --- Botão limpar comprados --- */
+.botao-limpar {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--linha);
+  background: transparent;
+  color: var(--tinta-suave);
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* --- Barra de adicionar, fixa embaixo (padrão de app mobile) --- */
+.barra-adicionar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: var(--papel-alt);
+  border-top: 1px solid var(--linha);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.select-categoria {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  font-size: 18px;
+  text-align: center;
+  text-align-last: center;
+}
+
+.input-item {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--linha);
+  font-family: var(--fonte-corpo);
+  font-size: 15px;
+  color: var(--tinta);
+  background: var(--papel);
+}
+
+.input-item:focus, .select-categoria:focus {
+  outline: none;
+  border-color: var(--marca);
+}
+
+.stepper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--papel);
+  border: 1.5px solid var(--linha);
+  border-radius: 12px;
+  height: 46px;
+  padding: 0 4px;
+}
+
+.stepper-botao {
+  width: 28px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  font-size: 17px;
+  color: var(--marca);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.stepper-valor {
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 16px;
+  text-align: center;
+}
+
+.botao-adicionar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: none;
+  background: var(--marca);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* --- Telas pequenas: reduz o stepper para caber --- */
+@media (max-width: 360px) {
+  .stepper { display: none; }
 }

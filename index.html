@@ -2,50 +2,65 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fichário — Lista de Tarefas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Lista de Compras</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <main class="board">
-    <header class="board__header">
-      <span class="board__eyebrow">Ficha 01 / Tarefas diárias</span>
-      <h1 class="board__title">Fichário</h1>
-      <p class="board__subtitle">Cada tarefa é uma ficha. Escreve, arquiva, arranca.</p>
+  <div class="app">
+    <header class="cabecalho">
+      <h1>🧺 Lista de Compras</h1>
+      <div class="progresso" id="progresso">
+        <div class="progresso-texto" id="progresso-texto">0 de 0 comprados</div>
+        <div class="progresso-barra">
+          <div class="progresso-preenchido" id="progresso-preenchido"></div>
+        </div>
+      </div>
     </header>
 
-    <form class="composer" id="composer">
-      <input
-        type="text"
-        id="taskInput"
-        class="composer__input"
-        placeholder="O que precisa ser feito?"
-        autocomplete="off"
-        maxlength="80"
-      />
-      <button type="submit" class="composer__button">Arquivar</button>
-    </form>
+    <div class="filtros" id="filtros">
+      <button class="filtro filtro-ativo" data-categoria="todos">Todos</button>
+      <button class="filtro" data-categoria="hortifruti">🥦 Hortifruti</button>
+      <button class="filtro" data-categoria="laticinios">🧀 Laticínios</button>
+      <button class="filtro" data-categoria="limpeza">🧽 Limpeza</button>
+      <button class="filtro" data-categoria="higiene">🧴 Higiene</button>
+      <button class="filtro" data-categoria="outros">📦 Outros</button>
+    </div>
 
-    <nav class="filters" id="filters">
-      <button class="filters__btn is-active" data-filter="all">Todas</button>
-      <button class="filters__btn" data-filter="active">Pendentes</button>
-      <button class="filters__btn" data-filter="completed">Concluídas</button>
-    </nav>
+    <main class="lista-container">
+      <ul class="lista" id="lista"></ul>
+      <p class="mensagem-vazia" id="mensagem-vazia">Sua lista está vazia. Adicione o primeiro item abaixo! 👇</p>
+    </main>
 
-    <ul class="stack" id="taskList" aria-live="polite"></ul>
+    <button class="botao-limpar" id="botao-limpar" hidden>🗑️ Limpar comprados</button>
+  </div>
 
-    <p class="empty-state" id="emptyState" hidden>
-      Nenhuma ficha por aqui ainda. Escreva a primeira tarefa acima.
-    </p>
-
-    <footer class="board__footer">
-      <span id="counter">0 tarefas pendentes</span>
-      <button class="board__clear" id="clearCompleted">Limpar concluídas</button>
-    </footer>
-  </main>
+  <form class="barra-adicionar" id="form-adicionar">
+    <select class="select-categoria" id="select-categoria" aria-label="Categoria">
+      <option value="hortifruti">🥦</option>
+      <option value="laticinios">🧀</option>
+      <option value="limpeza">🧽</option>
+      <option value="higiene">🧴</option>
+      <option value="outros" selected>📦</option>
+    </select>
+    <input
+      type="text"
+      id="input-item"
+      class="input-item"
+      placeholder="Adicionar item..."
+      autocomplete="off"
+      required
+    />
+    <div class="stepper">
+      <button type="button" class="stepper-botao" id="qtd-menos" aria-label="Diminuir quantidade">−</button>
+      <span class="stepper-valor" id="qtd-valor">1</span>
+      <button type="button" class="stepper-botao" id="qtd-mais" aria-label="Aumentar quantidade">+</button>
+    </div>
+    <button type="submit" class="botao-adicionar" aria-label="Adicionar">➕</button>
+  </form>
 
   <script src="script.js"></script>
 </body>
