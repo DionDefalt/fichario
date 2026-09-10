@@ -181,6 +181,15 @@ filtrosContainer.addEventListener("click", (e) => {
   botao.classList.add("filtro-ativo");
   filtroAtivo = botao.dataset.categoria;
   renderizar();
+
+  // Melhoria de usabilidade: tocar num filtro (ex: "Hortifruti") já
+  // deixa o formulário de adicionar pronto nessa mesma categoria, e
+  // coloca o foco no campo de texto — economiza o usuário ter que
+  // trocar o seletor de categoria manualmente lá embaixo depois.
+  if (filtroAtivo !== "todos") {
+    selectCategoria.value = filtroAtivo;
+    inputItem.focus();
+  }
 });
 
 botaoLimpar.addEventListener("click", limparComprados);
