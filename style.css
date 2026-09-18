@@ -17,6 +17,30 @@
   --fonte-corpo: 'Work Sans', system-ui, sans-serif;
 }
 
+/* --- Modo escuro --- */
+body.tema-escuro {
+  --papel: #17211d;
+  --papel-alt: #1f2b26;
+  --linha: #33443d;
+  --tinta: #e9f1ec;
+  --tinta-suave: #93a69d;
+  --marca: #4bbf9c;
+  --marca-clara: #1f3a32;
+}
+
+body,
+.item,
+.perto-de-mim,
+.perto-item,
+.barra-adicionar,
+.input-item,
+.input-busca,
+.select-raio,
+.stepper,
+.filtro {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -45,12 +69,55 @@ body {
   margin-bottom: 18px;
 }
 
+.cabecalho-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
 .cabecalho h1 {
   font-family: var(--fonte-titulo);
   font-size: 24px;
   font-weight: 700;
-  margin: 0 0 14px;
+  margin: 0;
   color: var(--marca);
+}
+
+.cabecalho-acoes {
+  display: flex;
+  gap: 6px;
+}
+
+.botao-icone {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel-alt);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-busca {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel-alt);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.input-busca:focus {
+  outline: none;
+  border-color: var(--marca);
 }
 
 .progresso-texto {
@@ -191,6 +258,7 @@ body {
   font-weight: 600;
 }
 
+.item-editar,
 .item-excluir {
   flex-shrink: 0;
   width: 32px;
@@ -199,14 +267,113 @@ body {
   border: none;
   background: transparent;
   color: var(--tinta-suave);
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.item-editar:active,
 .item-excluir:active { background: var(--linha); }
+
+/* --- Cabeçalho de grupo (visão "Todos", agrupada por categoria) --- */
+.grupo-cabecalho {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  padding: 10px 4px 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.grupo-cabecalho:first-child {
+  padding-top: 0;
+}
+
+/* --- Edição inline de um item --- */
+.item-em-edicao {
+  flex-wrap: wrap;
+  gap: 8px;
+  border-left-color: var(--marca);
+}
+
+.edicao-nome {
+  flex: 1 1 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 14px;
+}
+
+.edicao-categoria {
+  flex: 1;
+  height: 34px;
+  border-radius: 8px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 13px;
+  padding: 0 6px;
+}
+
+.edicao-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--papel);
+  border: 1.5px solid var(--linha);
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 6px;
+}
+
+.edicao-qtd-menos,
+.edicao-qtd-mais {
+  width: 22px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--marca);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.edicao-qtd-valor {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 14px;
+  text-align: center;
+}
+
+.edicao-salvar,
+.edicao-cancelar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.edicao-salvar {
+  background: var(--marca);
+  color: white;
+}
+
+.edicao-cancelar {
+  background: transparent;
+  border: 1.5px solid var(--linha);
+  color: var(--tinta-suave);
+}
 
 /* --- Perto de mim --- */
 .perto-de-mim {
@@ -419,18 +586,6 @@ body {
   margin: 0 auto;
 }
 
-.select-categoria {
-  flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1.5px solid var(--linha);
-  background: var(--papel);
-  font-size: 18px;
-  text-align: center;
-  text-align-last: center;
-}
-
 .input-item {
   flex: 1;
   min-width: 0;
@@ -444,7 +599,7 @@ body {
   background: var(--papel);
 }
 
-.input-item:focus, .select-categoria:focus {
+.input-item:focus {
   outline: none;
   border-color: var(--marca);
 }

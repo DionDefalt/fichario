@@ -12,13 +12,26 @@
 <body>
   <div class="app">
     <header class="cabecalho">
-      <h1>🧺 Lista de Compras</h1>
+      <div class="cabecalho-titulo">
+        <h1>🧺 Lista de Compras</h1>
+        <div class="cabecalho-acoes">
+          <button class="botao-icone" id="botao-compartilhar" aria-label="Compartilhar lista" hidden>📤</button>
+          <button class="botao-icone" id="botao-tema" aria-label="Alternar modo escuro">🌙</button>
+        </div>
+      </div>
       <div class="progresso" id="progresso">
         <div class="progresso-texto" id="progresso-texto">0 de 0 comprados</div>
         <div class="progresso-barra">
           <div class="progresso-preenchido" id="progresso-preenchido"></div>
         </div>
       </div>
+      <input
+        type="search"
+        id="input-busca"
+        class="input-busca"
+        placeholder="🔎 Buscar item..."
+        autocomplete="off"
+      />
     </header>
 
     <div class="filtros" id="filtros">

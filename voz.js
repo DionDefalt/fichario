@@ -1,6 +1,7 @@
 // Adicionar itens por comando de voz — usa a Web Speech API do
 // navegador (gratuita, sem chave), reconhece frases como "adicionar
-// leite à lista" e categoriza o item automaticamente por palavra-chave.
+// duas maçãs à lista" e categoriza o item automaticamente por
+// palavra-chave, já extraindo a quantidade falada.
 //
 // LIMITAÇÃO REAL: reconhecimento de fala funciona bem no Chrome
 // (desktop e Android), mas o Safari/iPhone tem suporte muito limitado
@@ -18,21 +19,44 @@ const PALAVRAS_POR_CATEGORIA = {
     "batata", "cenoura", "uva", "limão", "limao", "mamão", "mamao",
     "manga", "abacate", "pepino", "pimentão", "pimentao", "brócolis",
     "brocolis", "morango", "melancia", "abóbora", "abobora", "couve",
+    "berinjela", "beterraba", "chuchu", "espinafre", "rúcula", "rucula",
+    "repolho", "vagem", "quiabo", "milho", "abacaxi", "melão", "melao",
+    "pera", "pêssego", "pessego", "kiwi", "coco", "gengibre", "alho",
+    "salsa", "cebolinha", "coentro", "hortelã", "hortela",
   ],
   laticinios: [
     "leite", "queijo", "iogurte", "manteiga", "requeijão", "requeijao",
-    "nata", "creme de leite", "margarina", "coalhada",
+    "nata", "creme de leite", "margarina", "coalhada", "mussarela",
+    "muçarela", "queijo minas", "queijo prato", "ricota", "parmesão",
+    "parmesao", "leite condensado", "leite em pó", "leite em po",
+    "danone", "petit suisse", "bebida láctea", "bebida lactea",
+    "ovo", "ovos",
   ],
   limpeza: [
     "detergente", "sabão em pó", "sabao em po", "desinfetante",
     "água sanitária", "agua sanitaria", "amaciante", "esponja",
     "saco de lixo", "papel toalha", "veja", "multiuso", "vassoura",
+    "rodo", "pano de chão", "pano de chao", "álcool", "alcool",
+    "sabão em barra", "sabao em barra", "cera", "limpa vidro",
+    "inseticida", "sapólio", "sapolio", "fósforo", "fosforo", "vela",
+    "pilha", "prendedor de roupa", "sabonete líquido para mãos",
   ],
   higiene: [
     "sabonete", "shampoo", "condicionador", "pasta de dente",
     "creme dental", "escova de dente", "papel higiênico",
     "papel higienico", "absorvente", "desodorante", "fio dental",
+    "cotonete", "algodão", "algodao", "lâmina de barbear",
+    "lamina de barbear", "creme de barbear", "hidratante", "protetor solar",
+    "fralda", "lenço umedecido", "lenco umedecido", "enxaguante bucal",
   ],
+};
+
+// Números por extenso reconhecidos ao falar quantidade — a Web Speech
+// API às vezes já transcreve como dígito ("2"), então o regex de
+// extração aceita os dois formatos.
+const NUMERO_POR_EXTENSO = {
+  um: 1, uma: 1, dois: 2, duas: 2, três: 3, tres: 3, quatro: 4,
+  cinco: 5, seis: 6, sete: 7, oito: 8, nove: 9, dez: 10,
 };
 
 function classificarItem(nome) {
@@ -57,6 +81,23 @@ function extrairNomeDoComando(transcricao) {
   return texto.trim();
 }
 
+function extrairQuantidadeENome(textoLimpo) {
+  const padraoNumero = Object.keys(NUMERO_POR_EXTENSO).join("|");
+  const regex = new RegExp(`^(\\d+|${padraoNumero})\\s+(.+)$`, "i");
+  const encontrado = textoLimpo.match(regex);
+
+  if (!encontrado) {
+    return { quantidade: 1, nome: textoLimpo };
+  }
+
+  const [, palavraQuantidade, resto] = encontrado;
+  const quantidade = /^\d+$/.test(palavraQuantidade)
+    ? parseInt(palavraQuantidade, 10)
+    : NUMERO_POR_EXTENSO[palavraQuantidade.toLowerCase()];
+
+  return { quantidade: Math.min(quantidade, 99), nome: resto.trim() };
+}
+
 function iniciarReconhecimentoDeVoz() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const reconhecimento = new SpeechRecognition();
@@ -71,16 +112,20 @@ function iniciarReconhecimentoDeVoz() {
 
   reconhecimento.onresult = (evento) => {
     const transcricao = evento.results[0][0].transcript;
-    const nomeItem = extrairNomeDoComando(transcricao);
+    const textoLimpo = extrairNomeDoComando(transcricao);
 
-    if (!nomeItem) return;
+    if (!textoLimpo) return;
 
-    const categoria = classificarItem(nomeItem);
-    adicionarItem(nomeItem, categoria, 1); // adicionarItem() vem de script.js
+    const { quantidade, nome } = extrairQuantidadeENome(textoLimpo);
+    if (!nome) return;
+
+    const categoria = classificarItem(nome);
+    adicionarItem(nome, categoria, quantidade); // adicionarItem() vem de script.js
 
     if ("speechSynthesis" in window) {
+      const textoQuantidade = quantidade > 1 ? `${quantidade} ` : "";
       const utterance = new SpeechSynthesisUtterance(
-        `${nomeItem} adicionado em ${NOMES_CATEGORIA[categoria]}.`
+        `${textoQuantidade}${nome} adicionado em ${NOMES_CATEGORIA[categoria]}.`
       );
       utterance.lang = "pt-BR";
       window.speechSynthesis.speak(utterance);

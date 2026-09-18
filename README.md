@@ -8,13 +8,17 @@ Projeto irmão do [Fichário](https://github.com/DionDefalt) original (mesma sta
 
 - Adicionar item com categoria (Hortifruti, Laticínios, Limpeza, Higiene, Outros) e quantidade
 - Marcar item como comprado (com indicador visual e progresso geral)
-- Filtrar a lista por categoria
+- **Editar um item já adicionado** (nome, categoria e quantidade), sem precisar excluir e recriar
+- Filtrar a lista por categoria — na visão "Todos", os itens aparecem **agrupados por categoria** com cabeçalhos, mais fácil de escanear
+- **Buscar item por nome** em tempo real
 - Limpar todos os itens já comprados de uma vez
 - Excluir item individualmente
+- **Modo escuro**, com preferência lembrada entre sessões (e detecção automática da preferência do sistema na primeira visita)
+- **Exportar/compartilhar a lista** — usa o compartilhamento nativo do celular quando disponível, ou abre o WhatsApp com a lista pronta como alternativa
 - Dados persistem entre sessões (localStorage) — a lista continua lá mesmo se você fechar o navegador
 - Layout pensado para celular: barra de adicionar fixa na parte inferior (alcance de polegar), botões grandes o suficiente pra toque
 - **📍 Perto de mim**: detecta supermercados, padarias, farmácias e oficinas próximos usando dados abertos do OpenStreetMap, com aviso por voz quando você entra no raio configurado
-- **🎤 Adicionar por voz**: fale "adicionar leite" e o item entra na lista já na categoria certa (Laticínios), por reconhecimento de palavra-chave
+- **🎤 Adicionar por voz**: fale "adicionar duas maçãs" e o item entra na lista já com a quantidade certa, na categoria certa (Hortifruti), por reconhecimento de palavra-chave e de número por extenso
 
 ## 📍 Como funciona o "Perto de mim"
 
@@ -37,6 +41,8 @@ Toque no ícone de microfone, fale algo como *"adicionar leite"* ou *"colocar de
 4. Adiciona o item e confirma por voz
 
 **Compatibilidade**: reconhecimento de voz funciona bem no Chrome (desktop e Android); no Safari/iPhone o suporte é limitado ou inexistente — nesse caso, o botão de microfone fica automaticamente escondido, em vez de aparecer e falhar sem explicação.
+
+Também reconhece quantidade falada: "adicionar duas maçãs" ou "adicionar 3 leites" já extraem a quantidade certa (por extenso ou dígito), sem precisar dizer só o nome do item.
 
 ## 🖥️ Como usar
 
@@ -70,13 +76,9 @@ Paleta e tipografia pensadas para o domínio (organização doméstica): fundo c
 
 ## 🚀 Próximos passos (ideias de evolução)
 
-- [ ] Editar um item já adicionado (hoje só dá para excluir e recriar)
-- [ ] Adicionar campo de busca para listas grandes
-- [ ] Modo escuro
-- [ ] Exportar/compartilhar a lista (ex: gerar link ou texto para enviar por WhatsApp)
-- [ ] Ordenação automática por categoria dentro da lista
-- [ ] Reconhecer quantidades faladas ("adicionar duas maçãs")
-- [ ] Expandir o dicionário de categorização automática por voz
+- [ ] Múltiplas listas (ex: "Mercado" e "Farmácia" separadas)
+- [ ] Sincronizar a lista entre dispositivos (hoje é só local, por navegador)
+- [ ] Sugestão de itens recorrentes com base no histórico de compras
 
 ---
 
