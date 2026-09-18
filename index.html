@@ -30,6 +30,31 @@
       <button class="filtro" data-categoria="outros">📦 Outros</button>
     </div>
 
+    <section class="perto-de-mim" id="perto-de-mim">
+      <div class="perto-cabecalho">
+        <h2>📍 Perto de mim</h2>
+        <button class="botao-perto-toggle" id="botao-perto-toggle">Ativar</button>
+      </div>
+
+      <div class="perto-config" id="perto-config" hidden>
+        <div class="perto-tipos" id="perto-tipos">
+          <button class="tipo-chip tipo-ativo" data-tipo="mercado">🛒 Mercado</button>
+          <button class="tipo-chip tipo-ativo" data-tipo="padaria">🥖 Padaria</button>
+          <button class="tipo-chip tipo-ativo" data-tipo="farmacia">💊 Farmácia</button>
+          <button class="tipo-chip tipo-ativo" data-tipo="oficina">🔧 Oficina</button>
+        </div>
+        <label for="select-raio">Avisar quando estiver a menos de:</label>
+        <select id="select-raio" class="select-raio">
+          <option value="200">200 m</option>
+          <option value="500" selected>500 m</option>
+          <option value="1000">1 km</option>
+        </select>
+      </div>
+
+      <p class="perto-status" id="perto-status"></p>
+      <ul class="perto-lista" id="perto-lista"></ul>
+    </section>
+
     <main class="lista-container">
       <ul class="lista" id="lista"></ul>
       <p class="mensagem-vazia" id="mensagem-vazia">Sua lista está vazia. Adicione o primeiro item abaixo! 👇</p>
@@ -39,21 +64,15 @@
   </div>
 
   <form class="barra-adicionar" id="form-adicionar">
-    <select class="select-categoria" id="select-categoria" aria-label="Categoria">
-      <option value="hortifruti">🥦</option>
-      <option value="laticinios">🧀</option>
-      <option value="limpeza">🧽</option>
-      <option value="higiene">🧴</option>
-      <option value="outros" selected>📦</option>
-    </select>
     <input
       type="text"
       id="input-item"
       class="input-item"
-      placeholder="Adicionar item..."
+      placeholder="Adicionar em Outros..."
       autocomplete="off"
       required
     />
+    <button type="button" class="botao-voz" id="botao-voz" aria-label="Adicionar por voz">🎤</button>
     <div class="stepper">
       <button type="button" class="stepper-botao" id="qtd-menos" aria-label="Diminuir quantidade">−</button>
       <span class="stepper-valor" id="qtd-valor">1</span>
@@ -63,5 +82,7 @@
   </form>
 
   <script src="script.js"></script>
+  <script src="proximidade.js"></script>
+  <script src="voz.js"></script>
 </body>
 </html>
