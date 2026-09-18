@@ -119,13 +119,14 @@ function iniciarReconhecimentoDeVoz() {
     const { quantidade, nome } = extrairQuantidadeENome(textoLimpo);
     if (!nome) return;
 
-    const categoria = classificarItem(nome);
+    const categoriaBruta = classificarItem(nome);
+    const categoria = garantirCategoriaExiste(categoriaBruta); // script.js — cria a categoria se ainda não estiver ativa
     adicionarItem(nome, categoria, quantidade); // adicionarItem() vem de script.js
 
     if ("speechSynthesis" in window) {
       const textoQuantidade = quantidade > 1 ? `${quantidade} ` : "";
       const utterance = new SpeechSynthesisUtterance(
-        `${textoQuantidade}${nome} adicionado em ${NOMES_CATEGORIA[categoria]}.`
+        `${textoQuantidade}${nome} adicionado em ${nomeCategoria(categoria)}.`
       );
       utterance.lang = "pt-BR";
       window.speechSynthesis.speak(utterance);

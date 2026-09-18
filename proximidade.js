@@ -106,7 +106,12 @@ function identificarTipo(tags) {
 function abrirNavegacaoGoogleMaps(lat, lon) {
   // Deep link universal do Google Maps — sempre gratuito, sem chave de
   // API, e abre o app instalado no celular (ou o site, no desktop).
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  //
+  // "dir_action=navigate" é um parâmetro oficial documentado pelo
+  // Google: como não especificamos uma origem, ele assume a
+  // localização atual do usuário e já entra direto no modo de
+  // navegação por voz — sem precisar tocar em "Iniciar" depois.
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&dir_action=navigate`;
   window.open(url, "_blank", "noopener,noreferrer");
 }
 

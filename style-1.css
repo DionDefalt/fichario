@@ -7,15 +7,10 @@
   --marca: #1f6f5c;
   --marca-clara: #e4f0ec;
 
-  --cat-hortifruti: #6b9b5e;
-  --cat-laticinios: #d9a441;
-  --cat-limpeza: #4f8fbf;
-  --cat-higiene: #c97ba0;
-  --cat-outros: #8b8378;
+  --cat-generica: #8b8378;
 
   --fonte-titulo: 'Baloo 2', system-ui, sans-serif;
   --fonte-corpo: 'Work Sans', system-ui, sans-serif;
-  color-scheme: light;
 }
 
 /* --- Modo escuro --- */
@@ -27,7 +22,6 @@ body.tema-escuro {
   --tinta-suave: #93a69d;
   --marca: #4bbf9c;
   --marca-clara: #1f3a32;
-  color-scheme: dark;
 }
 
 body,
@@ -38,30 +32,14 @@ body,
 .input-item,
 .input-busca,
 .select-raio,
+.stepper,
 .filtro {
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-/* --- Corrige texto preto em <select> no modo escuro (bug conhecido do
-   Chrome/Android: sem "color-scheme", o navegador ignora a cor definida
-   via CSS no valor selecionado, mesmo com o fundo já escuro) --- */
-body.tema-escuro .select-raio,
-body.tema-escuro .edicao-categoria {
-  color-scheme: dark;
 }
 
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Garante que o atributo "hidden" sempre esconda o elemento de
-   verdade, mesmo quando a classe dele também define "display"
-   explicitamente (ex: display:flex nos botões de ícone) — sem essa
-   regra, a declaração de display da classe teria prioridade sobre o
-   [hidden] padrão do navegador, deixando o elemento visível por engano. */
-[hidden] {
-  display: none !important;
 }
 
 body {
@@ -173,10 +151,6 @@ body {
 
 .filtros::-webkit-scrollbar { display: none; }
 
-.filtros-wrapper {
-  position: relative;
-}
-
 .filtro {
   flex-shrink: 0;
   font-family: var(--fonte-corpo);
@@ -196,82 +170,110 @@ body {
   color: white;
 }
 
-.filtro-adicionar {
-  border-style: dashed;
-  background: transparent;
-  color: var(--marca);
-  font-weight: 600;
-}
-
-/* --- Modal "Categorias" (catálogo com toque para ativar/desativar) --- */
-.modal-fundo {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  z-index: 20;
-}
-
-.modal-fundo[hidden] {
-  display: none;
-}
-
-.modal-caixa {
-  background: var(--papel-alt);
-  border-radius: 18px 18px 0 0;
-  padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
-  width: 100%;
-  max-width: 480px;
-  max-height: 75vh;
-  overflow-y: auto;
-}
-
-.modal-topo {
-  display: flex;
-  justify-content: space-between;
+.filtro-categoria {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 4px;
+  gap: 6px;
 }
 
-.modal-topo h2 {
-  font-family: var(--fonte-titulo);
-  font-size: 18px;
-  color: var(--marca);
-  margin: 0;
+.filtro-excluir {
+  font-size: 11px;
+  opacity: 0.55;
+  padding: 1px 2px;
+  line-height: 1;
 }
 
-.modal-dica {
-  font-size: 12.5px;
-  color: var(--tinta-suave);
-  margin: 0 0 14px;
+.filtro-excluir:active {
+  opacity: 1;
 }
 
-.catalogo-categorias {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.catalogo-item {
+.chip-nova-categoria {
+  flex-shrink: 0;
   font-family: var(--fonte-corpo);
   font-size: 13.5px;
   font-weight: 500;
-  padding: 10px 8px;
-  border-radius: 10px;
-  border: 1.5px solid var(--linha);
-  background: var(--papel);
-  color: var(--tinta-suave);
+  padding: 8px 14px;
+  border-radius: 99px;
+  border: 1.5px dashed var(--marca);
+  background: transparent;
+  color: var(--marca);
   cursor: pointer;
-  text-align: left;
 }
 
-.catalogo-item-ativo {
+/* --- Painel "+ Nova categoria" --- */
+.nova-categoria-painel {
+  background: var(--papel-alt);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--linha);
+}
+
+.nova-categoria-label {
+  font-size: 12.5px;
+  color: var(--tinta-suave);
+  margin: 0 0 8px;
+}
+
+.nova-categoria-sugestoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sugestao-categoria {
+  font-family: var(--fonte-corpo);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 99px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+.sugestao-categoria:active {
   background: var(--marca-clara);
   border-color: var(--marca);
-  color: var(--marca);
+}
+
+.nova-categoria-custom {
+  display: flex;
+  gap: 8px;
+}
+
+.nova-categoria-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
+}
+
+.nova-categoria-input:focus {
+  outline: none;
+  border-color: var(--marca);
+}
+
+.nova-categoria-criar {
+  flex-shrink: 0;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--marca);
+  color: white;
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
   font-weight: 600;
+  cursor: pointer;
 }
 
 /* --- Lista --- */
@@ -299,15 +301,13 @@ body {
   background: var(--papel-alt);
   border-radius: 12px;
   padding: 12px 14px;
-  border-left: 5px solid var(--cat-outros);
+  border-left: 5px solid var(--cat-generica);
   position: relative;
 }
 
-.item[data-categoria="hortifruti"] { border-left-color: var(--cat-hortifruti); }
-.item[data-categoria="laticinios"] { border-left-color: var(--cat-laticinios); }
-.item[data-categoria="limpeza"] { border-left-color: var(--cat-limpeza); }
-.item[data-categoria="higiene"] { border-left-color: var(--cat-higiene); }
-.item[data-categoria="outros"] { border-left-color: var(--cat-outros); }
+/* A cor da borda de cada item agora vem da categoria dinâmica dele,
+   aplicada via inline style em script.js (obterCategoria().cor) —
+   var(--cat-generica) acima é só o valor inicial antes do JS rodar. */
 
 .item-checkbox {
   width: 26px;
@@ -557,6 +557,11 @@ body {
   padding: 0 10px;
   font-family: var(--fonte-corpo);
   font-size: 13.5px;
+  color-scheme: light;
+}
+
+body.tema-escuro .select-raio {
+  color-scheme: dark;
 }
 
 .perto-status {
@@ -688,15 +693,14 @@ body {
 }
 
 .input-item {
-  flex: 1 1 auto;
+  flex: 1;
   min-width: 0;
-  height: 52px;
-  padding: 0 18px;
-  border-radius: 14px;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
   border: 1.5px solid var(--linha);
   font-family: var(--fonte-corpo);
-  font-size: 16.5px;
-  text-align: center;
+  font-size: 15px;
   color: var(--tinta);
   background: var(--papel);
 }
@@ -704,62 +708,66 @@ body {
 .input-item:focus {
   outline: none;
   border-color: var(--marca);
-  text-align: left;
 }
 
-/* Controle de quantidade compacto: número no meio, com uma seta ▲
-   acima (aumenta) e ▼ abaixo (diminui) — empilhadas na vertical, em
-   vez de dois botões −/+ largos lado a lado. */
-.stepper-vertical {
+.stepper {
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 40px;
-  height: 52px;
+  gap: 5px;
   background: var(--papel);
   border: 1.5px solid var(--linha);
   border-radius: 10px;
-  padding: 4px 0;
+  height: 40px;
+  padding: 0 6px 0 10px;
 }
 
 .stepper-valor {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--tinta);
-  line-height: 1;
+  font-weight: 600;
+  min-width: 14px;
+  text-align: center;
+}
+
+.stepper-setas {
+  display: flex;
+  flex-direction: column;
+  height: 30px;
+  justify-content: space-between;
 }
 
 .stepper-seta {
-  width: 28px;
-  height: 16px;
+  width: 20px;
+  height: 14px;
   border: none;
   background: transparent;
-  font-size: 10px;
+  font-size: 8px;
   line-height: 1;
   color: var(--marca);
   cursor: pointer;
-  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+}
+
+.stepper-seta:active {
+  color: var(--tinta);
 }
 
 .botao-adicionar {
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   border: none;
   background: var(--marca);
   color: white;
-  font-size: 19px;
+  font-size: 18px;
   cursor: pointer;
 }
 
-/* --- Telas pequenas: encolhe um pouco o stepper para caber --- */
+/* --- Telas pequenas: reduz o stepper para caber --- */
 @media (max-width: 360px) {
-  .stepper-vertical { padding: 0 3px; }
+  .stepper { display: none; }
 }

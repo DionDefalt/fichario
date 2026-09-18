@@ -34,13 +34,18 @@
       />
     </header>
 
-    <div class="filtros" id="filtros">
-      <button class="filtro filtro-ativo" data-categoria="todos">Todos</button>
-      <button class="filtro" data-categoria="hortifruti">🥦 Hortifruti</button>
-      <button class="filtro" data-categoria="laticinios">🧀 Laticínios</button>
-      <button class="filtro" data-categoria="limpeza">🧽 Limpeza</button>
-      <button class="filtro" data-categoria="higiene">🧴 Higiene</button>
-      <button class="filtro" data-categoria="outros">📦 Outros</button>
+    <div class="filtros" id="filtros"></div>
+
+    <!-- Modal do catálogo de categorias — abre ao tocar no "+" dos filtros -->
+    <div class="modal-fundo" id="modal-categorias" hidden>
+      <div class="modal-caixa">
+        <div class="modal-topo">
+          <h2>Categorias</h2>
+          <button class="botao-icone" id="botao-fechar-categorias" aria-label="Fechar">✕</button>
+        </div>
+        <p class="modal-dica">Toque para ativar ou desativar uma categoria nos filtros.</p>
+        <div class="catalogo-categorias" id="catalogo-categorias"></div>
+      </div>
     </div>
 
     <section class="perto-de-mim" id="perto-de-mim">
@@ -77,6 +82,7 @@
   </div>
 
   <form class="barra-adicionar" id="form-adicionar">
+    <button type="button" class="botao-voz" id="botao-voz" aria-label="Adicionar por voz">🎤</button>
     <input
       type="text"
       id="input-item"
@@ -85,11 +91,10 @@
       autocomplete="off"
       required
     />
-    <button type="button" class="botao-voz" id="botao-voz" aria-label="Adicionar por voz">🎤</button>
-    <div class="stepper">
-      <button type="button" class="stepper-botao" id="qtd-menos" aria-label="Diminuir quantidade">−</button>
+    <div class="stepper-vertical">
+      <button type="button" class="stepper-seta" id="qtd-mais" aria-label="Aumentar quantidade">▲</button>
       <span class="stepper-valor" id="qtd-valor">1</span>
-      <button type="button" class="stepper-botao" id="qtd-mais" aria-label="Aumentar quantidade">+</button>
+      <button type="button" class="stepper-seta" id="qtd-menos" aria-label="Diminuir quantidade">▼</button>
     </div>
     <button type="submit" class="botao-adicionar" aria-label="Adicionar">➕</button>
   </form>

@@ -2,26 +2,39 @@
 
 const CHAVE_STORAGE = "lista-compras-itens";
 const CHAVE_TEMA = "lista-compras-tema";
+const CHAVE_CATEGORIAS = "lista-compras-categorias";
 
-const NOMES_CATEGORIA = {
-  hortifruti: "Hortifruti",
-  laticinios: "Laticínios",
-  limpeza: "Limpeza",
-  higiene: "Higiene",
-  outros: "Outros",
-};
-
-const EMOJI_CATEGORIA = {
-  hortifruti: "🥦",
-  laticinios: "🧀",
-  limpeza: "🧽",
-  higiene: "🧴",
-  outros: "📦",
-};
-
-// Ordem em que as categorias aparecem quando a lista está agrupada
-// (visão "Todos") — mesma ordem dos chips de filtro.
-const ORDEM_CATEGORIAS = ["hortifruti", "laticinios", "limpeza", "higiene", "outros"];
+// Sugestões de categoria oferecidas no painel "+ Categoria". O usuário
+// escolhe quais quer usar — nenhuma vem pré-ativada por padrão (exceto
+// "Outros", que é um destino interno sempre disponível, não removível,
+// usado quando nenhuma categoria específica foi escolhida ainda).
+const SUGESTOES_CATEGORIA = [
+  { id: "mercado", nome: "Mercado", emoji: "🛒" },
+  { id: "farmacia", nome: "Farmácia", emoji: "💊" },
+  { id: "oficina", nome: "Oficina", emoji: "🔧" },
+  { id: "padaria", nome: "Padaria", emoji: "🥖" },
+  { id: "fastfood", nome: "Fastfood", emoji: "🍔" },
+  { id: "guloseimas", nome: "Guloseimas", emoji: "🍬" },
+  { id: "sobremesas", nome: "Sobremesas", emoji: "🍰" },
+  { id: "vestuario", nome: "Vestuário", emoji: "👕" },
+  { id: "calcados", nome: "Calçados", emoji: "👟" },
+  { id: "papelaria", nome: "Papelaria", emoji: "📚" },
+  { id: "eletronicos", nome: "Eletrônicos", emoji: "💻" },
+  { id: "hortifruti", nome: "Hortifruti", emoji: "🥦" },
+  { id: "laticinios", nome: "Laticínios", emoji: "🧀" },
+  { id: "limpeza", nome: "Limpeza", emoji: "🧽" },
+  { id: "higiene", nome: "Higiene", emoji: "🧴" },
+  { id: "bebidas", nome: "Bebidas", emoji: "🥤" },
+  { id: "pet", nome: "Pet", emoji: "🐾" },
+  { id: "brinquedos", nome: "Brinquedos", emoji: "🧸" },
+  { id: "ferramentas", nome: "Ferramentas", emoji: "🔨" },
+  { id: "presentes", nome: "Presentes", emoji: "🎁" },
+  { id: "moveis", nome: "Móveis", emoji: "🛋️" },
+  { id: "livros", nome: "Livros", emoji: "📖" },
+  { id: "automotivo", nome: "Automotivo", emoji: "🚗" },
+  { id: "jardinagem", nome: "Jardinagem", emoji: "🌱" },
+  { id: "congelados", nome: "Congelados", emoji: "🧊" },
+];
 
 const lista = document.getElementById("lista");
 const mensagemVazia = document.getElementById("mensagem-vazia");
@@ -39,6 +52,7 @@ const progressoTexto = document.getElementById("progresso-texto");
 const progressoPreenchido = document.getElementById("progresso-preenchido");
 
 let itens = carregarItens();
+let categoriasAtivas = carregarCategorias();
 let quantidadeAtual = 1;
 let filtroAtivo = "todos";
 let termoBusca = "";
@@ -58,6 +72,20 @@ function salvarItens() {
   localStorage.setItem(CHAVE_STORAGE, JSON.stringify(itens));
 }
 
+function carregarCategorias() {
+  try {
+    const salvo = localStorage.getItem(CHAVE_CATEGORIAS);
+    return salvo ? JSON.parse(salvo) : [];
+  } catch (erro) {
+    console.error("Não foi possível carregar as categorias salvas:", erro);
+    return [];
+  }
+}
+
+function salvarCategorias() {
+  localStorage.setItem(CHAVE_CATEGORIAS, JSON.stringify(categoriasAtivas));
+}
+
 function gerarId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
@@ -66,6 +94,134 @@ function escaparHTML(texto) {
   const div = document.createElement("div");
   div.textContent = texto;
   return div.innerHTML;
+}
+
+// --- Categorias (nome/emoji por id, incluindo o fallback "Outros") ---
+
+function nomeCategoria(id) {
+  if (id === "outros") return "Outros";
+  const cat = categoriasAtivas.find((c) => c.id === id);
+  return cat ? cat.nome : "Outros";
+}
+
+function emojiCategoria(id) {
+  if (id === "outros") return "📦";
+  const cat = categoriasAtivas.find((c) => c.id === id);
+  return cat ? cat.emoji : "📦";
+}
+
+function ordemCategorias() {
+  // "Outros" sempre por último, como destino residual — nunca aparece
+  // como chip removível, só como grupo na listagem se tiver itens nela.
+  return [...categoriasAtivas.map((c) => c.id), "outros"];
+}
+
+// Usado pelo comando de voz: se a categoria detectada pela IA de
+// palavras-chave ainda não estiver ativa, adiciona ela automaticamente
+// (usando a sugestão correspondente, se existir) — evita que o item
+// fique "escondido" numa categoria sem chip visível na tela.
+function garantirCategoriaExiste(id) {
+  if (id === "outros" || categoriasAtivas.some((c) => c.id === id)) return id;
+  const sugestao = SUGESTOES_CATEGORIA.find((s) => s.id === id);
+  if (sugestao) {
+    adicionarCategoria(sugestao);
+    return id;
+  }
+  return "outros";
+}
+
+function adicionarCategoria(sugestao) {
+  categoriasAtivas.push({ id: sugestao.id, nome: sugestao.nome, emoji: sugestao.emoji });
+  salvarCategorias();
+  renderizarFiltros();
+}
+
+// --- Modal "Categorias" (catálogo com toque para ativar/desativar) ---
+
+const modalCategorias = document.getElementById("modal-categorias");
+const catalogoCategorias = document.getElementById("catalogo-categorias");
+const botaoFecharCategorias = document.getElementById("botao-fechar-categorias");
+
+function abrirModalCategorias() {
+  renderizarCatalogoCategorias();
+  modalCategorias.hidden = false;
+}
+
+function fecharModalCategorias() {
+  modalCategorias.hidden = true;
+}
+
+function renderizarCatalogoCategorias() {
+  catalogoCategorias.innerHTML = "";
+
+  SUGESTOES_CATEGORIA.forEach((sugestao) => {
+    const ativa = categoriasAtivas.some((c) => c.id === sugestao.id);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "catalogo-item" + (ativa ? " catalogo-item-ativo" : "");
+    btn.innerHTML = `${sugestao.emoji} ${sugestao.nome}`;
+    btn.addEventListener("click", () => {
+      if (ativa) {
+        desativarCategoria(sugestao.id);
+      } else {
+        adicionarCategoria(sugestao);
+      }
+      renderizarCatalogoCategorias();
+      renderizarFiltros();
+      atualizarPlaceholder();
+      renderizar();
+    });
+    catalogoCategorias.appendChild(btn);
+  });
+}
+
+function desativarCategoria(id) {
+  // Diferente de uma exclusão permanente: é só "desmarcar" no catálogo.
+  // Os itens que já estavam nessa categoria vão para "Outros", e o
+  // usuário pode reativar a categoria no catálogo quando quiser.
+  categoriasAtivas = categoriasAtivas.filter((c) => c.id !== id);
+  itens.forEach((item) => {
+    if (item.categoria === id) item.categoria = "outros";
+  });
+  salvarCategorias();
+  salvarItens();
+  if (filtroAtivo === id) filtroAtivo = "todos";
+}
+
+// --- Filtros (chips), renderizados dinamicamente ---
+
+function renderizarFiltros() {
+  filtrosContainer.innerHTML = "";
+  filtrosContainer.appendChild(criarChipFiltro("todos", "Todos"));
+
+  categoriasAtivas.forEach((cat) => {
+    filtrosContainer.appendChild(criarChipFiltro(cat.id, `${cat.emoji} ${cat.nome}`));
+  });
+
+  const botaoAdicionar = document.createElement("button");
+  botaoAdicionar.type = "button";
+  botaoAdicionar.className = "filtro filtro-adicionar";
+  botaoAdicionar.textContent = "+ Categoria";
+  botaoAdicionar.addEventListener("click", abrirModalCategorias);
+  filtrosContainer.appendChild(botaoAdicionar);
+}
+
+function criarChipFiltro(id, rotulo) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "filtro" + (filtroAtivo === id ? " filtro-ativo" : "");
+  btn.dataset.categoria = id;
+  btn.textContent = rotulo;
+  btn.addEventListener("click", () => selecionarFiltro(id));
+  return btn;
+}
+
+function selecionarFiltro(id) {
+  filtroAtivo = id;
+  renderizarFiltros();
+  atualizarPlaceholder();
+  renderizar();
+  if (id !== "todos") inputItem.focus();
 }
 
 // --- Filtro + busca ---
@@ -84,7 +240,7 @@ function itensVisiveis() {
   return resultado;
 }
 
-// --- Renderização ---
+// --- Renderização da lista ---
 
 function renderizar() {
   const itensFiltrados = itensVisiveis();
@@ -116,16 +272,13 @@ function mensagemParaListaVazia() {
 }
 
 function renderizarAgrupadoPorCategoria(itensFiltrados) {
-  // Na visão "Todos" (sem busca ativa), agrupa por categoria com um
-  // pequeno cabeçalho — mais fácil de escanear visualmente que uma
-  // lista só cronológica quando há itens de vários tipos misturados.
-  ORDEM_CATEGORIAS.forEach((categoria) => {
+  ordemCategorias().forEach((categoria) => {
     const doGrupo = itensFiltrados.filter((item) => item.categoria === categoria);
     if (doGrupo.length === 0) return;
 
     const cabecalho = document.createElement("li");
     cabecalho.className = "grupo-cabecalho";
-    cabecalho.textContent = `${EMOJI_CATEGORIA[categoria]} ${NOMES_CATEGORIA[categoria]}`;
+    cabecalho.textContent = `${emojiCategoria(categoria)} ${nomeCategoria(categoria)}`;
     lista.appendChild(cabecalho);
 
     doGrupo.forEach((item) => lista.appendChild(criarElementoItem(item)));
@@ -169,10 +322,12 @@ function criarFormularioEdicao(item) {
   const li = document.createElement("li");
   li.className = "item item-em-edicao";
 
-  const opcoesCategoria = ORDEM_CATEGORIAS.map(
-    (cat) =>
-      `<option value="${cat}" ${cat === item.categoria ? "selected" : ""}>${EMOJI_CATEGORIA[cat]} ${NOMES_CATEGORIA[cat]}</option>`
-  ).join("");
+  const opcoesCategoria = ordemCategorias()
+    .map(
+      (cat) =>
+        `<option value="${cat}" ${cat === item.categoria ? "selected" : ""}>${emojiCategoria(cat)} ${nomeCategoria(cat)}</option>`
+    )
+    .join("");
 
   li.innerHTML = `
     <input type="text" class="edicao-nome" value="${escaparHTML(item.nome)}" />
@@ -288,15 +443,11 @@ function limparComprados() {
 // --- Categoria de destino do formulário de adicionar ---
 
 function categoriaParaAdicionar() {
-  // "Todos" não é uma categoria de verdade — nesse caso, novos itens
-  // caem em "Outros" por padrão. Qualquer categoria específica tocada
-  // nos filtros vira o destino do próximo item adicionado.
   return filtroAtivo === "todos" ? "outros" : filtroAtivo;
 }
 
 function atualizarPlaceholder() {
-  const nomeCategoria = NOMES_CATEGORIA[categoriaParaAdicionar()];
-  inputItem.placeholder = `Adicionar em ${nomeCategoria}...`;
+  inputItem.placeholder = `Adicionar em ${nomeCategoria(categoriaParaAdicionar())}...`;
 }
 
 // --- Modo escuro ---
@@ -320,11 +471,11 @@ function temaInicial() {
 function montarTextoDaLista() {
   const linhas = ["🧺 Lista de Compras", ""];
 
-  ORDEM_CATEGORIAS.forEach((categoria) => {
+  ordemCategorias().forEach((categoria) => {
     const doGrupo = itens.filter((item) => item.categoria === categoria);
     if (doGrupo.length === 0) return;
 
-    linhas.push(`${EMOJI_CATEGORIA[categoria]} ${NOMES_CATEGORIA[categoria]}`);
+    linhas.push(`${emojiCategoria(categoria)} ${nomeCategoria(categoria)}`);
     doGrupo.forEach((item) => {
       const marcador = item.comprado ? "☑" : "☐";
       linhas.push(`${marcador} ${item.nome} (${item.quantidade}x)`);
@@ -343,13 +494,10 @@ async function compartilharLista() {
       await navigator.share({ title: "Lista de Compras", text: texto });
       return;
     } catch (erro) {
-      // Usuário cancelou o compartilhamento — não é um erro real, só ignora.
       if (erro.name === "AbortError") return;
     }
   }
 
-  // Navegador sem suporte a Web Share (a maioria dos desktops): abre
-  // o WhatsApp Web/app já com o texto pronto, como alternativa gratuita.
   const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, "_blank", "noopener,noreferrer");
 }
@@ -383,26 +531,6 @@ qtdMaisBtn.addEventListener("click", () => {
   }
 });
 
-filtrosContainer.addEventListener("click", (e) => {
-  const botao = e.target.closest(".filtro");
-  if (!botao) return;
-
-  filtrosContainer
-    .querySelectorAll(".filtro")
-    .forEach((b) => b.classList.remove("filtro-ativo"));
-  botao.classList.add("filtro-ativo");
-  filtroAtivo = botao.dataset.categoria;
-  renderizar();
-
-  // Melhoria de usabilidade: tocar num filtro (ex: "Hortifruti") já
-  // deixa claro, pelo texto do campo, em qual categoria o próximo item
-  // digitado vai cair — sem precisar de um seletor separado.
-  atualizarPlaceholder();
-  if (filtroAtivo !== "todos") {
-    inputItem.focus();
-  }
-});
-
 inputBusca.addEventListener("input", () => {
   termoBusca = inputBusca.value;
   renderizar();
@@ -415,7 +543,14 @@ botaoTema.addEventListener("click", () => {
   aplicarTema(temaAtual === "escuro" ? "claro" : "escuro");
 });
 
+// Fecha o modal de categorias no X ou tocando fora da caixa (no fundo escurecido).
+botaoFecharCategorias.addEventListener("click", fecharModalCategorias);
+modalCategorias.addEventListener("click", (e) => {
+  if (e.target === modalCategorias) fecharModalCategorias();
+});
+
 // --- Inicialização ---
 aplicarTema(temaInicial());
+renderizarFiltros();
 atualizarPlaceholder();
 renderizar();

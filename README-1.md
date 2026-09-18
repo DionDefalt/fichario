@@ -37,7 +37,7 @@ Projeto irmão do [Fichário](https://github.com/DionDefalt) original (mesma sta
 Toque no ícone de microfone, fale algo como *"adicionar leite"* ou *"colocar detergente na lista"*, e o app:
 1. Transcreve sua fala (via [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) do navegador, gratuita, sem servidor)
 2. Remove palavras de comando ("adicionar", "à lista", etc.), extraindo só o nome do item
-3. Categoriza o item por um dicionário de palavras-chave (o mesmo padrão do [Organizador de Arquivos](https://github.com/DionDefalt/organizador-arquivos): fácil de estender, edite o dicionário `PALAVRAS_POR_CATEGORIA` em `voz.js`) — como as categorias agora são dinâmicas (criadas pelo usuário), a categoria reconhecida (ex: "Hortifruti") é reaproveitada se já existir, ou **criada automaticamente** se tiver sido apagada
+3. Categoriza o item por um dicionário de palavras-chave (o mesmo padrão do [Organizador de Arquivos](https://github.com/DionDefalt/organizador-arquivos): fácil de estender, edite o dicionário `PALAVRAS_POR_CATEGORIA` em `voz.js`)
 4. Adiciona o item e confirma por voz
 
 **Compatibilidade**: reconhecimento de voz funciona bem no Chrome (desktop e Android); no Safari/iPhone o suporte é limitado ou inexistente — nesse caso, o botão de microfone fica automaticamente escondido, em vez de aparecer e falhar sem explicação.
