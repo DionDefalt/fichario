@@ -51,16 +51,13 @@
     <section class="perto-de-mim" id="perto-de-mim">
       <div class="perto-cabecalho">
         <h2>📍 Perto de mim</h2>
-        <button class="botao-perto-toggle" id="botao-perto-toggle">Ativar</button>
+        <button class="botao-perto-toggle" id="botao-perto-toggle">Desativar</button>
       </div>
 
-      <div class="perto-config" id="perto-config" hidden>
-        <div class="perto-tipos" id="perto-tipos">
-          <button class="tipo-chip tipo-ativo" data-tipo="mercado">🛒 Mercado</button>
-          <button class="tipo-chip tipo-ativo" data-tipo="padaria">🥖 Padaria</button>
-          <button class="tipo-chip tipo-ativo" data-tipo="farmacia">💊 Farmácia</button>
-          <button class="tipo-chip tipo-ativo" data-tipo="oficina">🔧 Oficina</button>
-        </div>
+      <div class="perto-config" id="perto-config">
+        <p class="perto-tipos-necessarios" id="perto-tipos-necessarios">
+          Nenhum item pendente na lista — nada para buscar ainda.
+        </p>
         <label for="select-raio">Avisar quando estiver a menos de:</label>
         <select id="select-raio" class="select-raio">
           <option value="200">200 m</option>

@@ -10,12 +10,83 @@
 // não uma limitação deste código. Para um alerta "em segundo plano de
 // verdade" seria necessário um aplicativo nativo (Android/iOS).
 
+// Tipos de estabelecimento pesquisáveis no OpenStreetMap. Cada um tem
+// as tags OSM que o identificam, usadas na consulta à Overpass API.
 const TIPOS = {
-  mercado: { emoji: "🛒", rotulo: "Supermercado", tags: [['shop', 'supermarket']] },
-  padaria: { emoji: "🥖", rotulo: "Padaria", tags: [['shop', 'bakery']] },
-  farmacia: { emoji: "💊", rotulo: "Farmácia", tags: [['amenity', 'pharmacy']] },
-  oficina: { emoji: "🔧", rotulo: "Oficina", tags: [['shop', 'car_repair']] },
+  mercado: { emoji: "🛒", rotulo: "Supermercado", tags: [["shop", "supermarket"]] },
+  farmacia: { emoji: "💊", rotulo: "Farmácia", tags: [["amenity", "pharmacy"]] },
+  oficina: { emoji: "🔧", rotulo: "Oficina", tags: [["shop", "car_repair"]] },
+  padaria: { emoji: "🥖", rotulo: "Padaria", tags: [["shop", "bakery"]] },
+  fastfood: { emoji: "🍔", rotulo: "Fastfood", tags: [["amenity", "fast_food"]] },
+  doceria: { emoji: "🍬", rotulo: "Doceria", tags: [["shop", "confectionery"]] },
+  vestuario: { emoji: "👕", rotulo: "Loja de Roupas", tags: [["shop", "clothes"]] },
+  calcados: { emoji: "👟", rotulo: "Loja de Calçados", tags: [["shop", "shoes"]] },
+  papelaria: { emoji: "📚", rotulo: "Papelaria", tags: [["shop", "stationery"]] },
+  eletronicos: { emoji: "💻", rotulo: "Loja de Eletrônicos", tags: [["shop", "electronics"]] },
+  petshop: { emoji: "🐾", rotulo: "Pet Shop", tags: [["shop", "pet"]] },
+  brinquedos: { emoji: "🧸", rotulo: "Loja de Brinquedos", tags: [["shop", "toys"]] },
+  ferramentas: { emoji: "🔨", rotulo: "Loja de Ferramentas", tags: [["shop", "hardware"]] },
+  presentes: { emoji: "🎁", rotulo: "Loja de Presentes", tags: [["shop", "gift"]] },
+  moveis: { emoji: "🛋️", rotulo: "Loja de Móveis", tags: [["shop", "furniture"]] },
+  livraria: { emoji: "📖", rotulo: "Livraria", tags: [["shop", "books"]] },
+  autopecas: { emoji: "🚗", rotulo: "Loja de Autopeças", tags: [["shop", "car_parts"]] },
+  jardinagem: { emoji: "🌱", rotulo: "Loja de Jardinagem", tags: [["shop", "garden_centre"]] },
+  bebidas: { emoji: "🥤", rotulo: "Deposito de Bebidas", tags: [["shop", "beverages"], ["shop", "convenience"]] },
 };
+
+// Mapeia cada CATEGORIA DE ITEM (as mesmas de SUGESTOES_CATEGORIA, em
+// script.js) para o(s) TIPO(S) DE LOJA onde ela costuma ser encontrada
+// — é isso que corrige o bug de "refrigerante mandando pra oficina":
+// a busca de lugares agora é guiada pelo que está na lista, não por
+// uma seleção manual desconectada. Alguns itens podem ser comprados em
+// mais de um lugar (ex: higiene em farmácia OU mercado); outros são
+// exclusivos de um só tipo (ex: farmácia, nunca mercado).
+const CATEGORIA_PARA_TIPOS = {
+  mercado: ["mercado"],
+  farmacia: ["farmacia"],
+  oficina: ["oficina"],
+  padaria: ["padaria", "mercado"],
+  fastfood: ["fastfood"],
+  guloseimas: ["doceria", "mercado"],
+  sobremesas: ["doceria", "mercado"],
+  vestuario: ["vestuario"],
+  calcados: ["calcados"],
+  papelaria: ["papelaria"],
+  eletronicos: ["eletronicos"],
+  hortifruti: ["mercado"],
+  laticinios: ["mercado"],
+  limpeza: ["mercado"],
+  higiene: ["farmacia", "mercado"],
+  bebidas: ["mercado", "bebidas"],
+  pet: ["petshop"],
+  brinquedos: ["brinquedos"],
+  ferramentas: ["ferramentas"],
+  presentes: ["presentes"],
+  moveis: ["moveis"],
+  livros: ["livraria"],
+  automotivo: ["autopecas", "oficina"],
+  jardinagem: ["jardinagem"],
+  congelados: ["mercado"],
+  outros: ["mercado"], // fallback razoável — a maioria das coisas "genéricas" se acha num mercado
+};
+
+// Calcula, a partir dos itens AINDA NÃO COMPRADOS na lista (variável
+// `itens`, compartilhada globalmente com script.js), quais tipos de
+// loja realmente precisam ser buscados agora — em vez de um conjunto
+// fixo escolhido manualmente.
+function tiposNecessarios() {
+  const categoriasComItensPendentes = new Set(
+    itens.filter((item) => !item.comprado).map((item) => item.categoria)
+  );
+
+  const tipos = new Set();
+  categoriasComItensPendentes.forEach((categoria) => {
+    const mapeados = CATEGORIA_PARA_TIPOS[categoria] || ["mercado"];
+    mapeados.forEach((tipo) => tipos.add(tipo));
+  });
+
+  return tipos;
+}
 
 const RAIO_BUSCA_METROS = 2000; // até onde buscamos lugares (maior que o raio de alerta, para já sabermos deles com antecedência)
 const DISTANCIA_MINIMA_PARA_REBUSCAR = 300; // metros — evita bater na Overpass API a cada pequeno movimento
@@ -26,11 +97,10 @@ const configEl = document.getElementById("perto-config");
 const statusEl = document.getElementById("perto-status");
 const listaEl = document.getElementById("perto-lista");
 const selectRaio = document.getElementById("select-raio");
-const tiposContainer = document.getElementById("perto-tipos");
+const tiposNecessariosEl = document.getElementById("perto-tipos-necessarios");
 
 let watchId = null;
 let ativo = false;
-let tiposAtivos = new Set(Object.keys(TIPOS));
 let ultimaBusca = { lat: null, lon: null, timestamp: 0 };
 let lugaresEncontrados = [];
 let jaAlertados = new Set(); // ids de lugares já avisados nesta sessão (evita repetir o alerta toda hora)
@@ -51,7 +121,24 @@ function formatarDistancia(metros) {
   return metros < 1000 ? `${Math.round(metros)} m` : `${(metros / 1000).toFixed(1)} km`;
 }
 
+function renderizarTiposNecessarios(tipos) {
+  if (!tiposNecessariosEl) return;
+  if (tipos.size === 0) {
+    tiposNecessariosEl.textContent = "Nenhum item pendente na lista — nada para buscar ainda.";
+    return;
+  }
+  const rotulos = [...tipos].map((t) => `${TIPOS[t].emoji} ${TIPOS[t].rotulo}`);
+  tiposNecessariosEl.textContent = `Buscando: ${rotulos.join(", ")}`;
+}
+
 async function buscarLugaresProximos(lat, lon) {
+  const tiposAtivos = tiposNecessarios();
+  renderizarTiposNecessarios(tiposAtivos);
+
+  if (tiposAtivos.size === 0) {
+    return [];
+  }
+
   const tagsSelecionadas = [...tiposAtivos].flatMap((tipo) => TIPOS[tipo].tags);
   const clausulas = tagsSelecionadas
     .map(
@@ -160,7 +247,27 @@ function renderizarLista(posicaoAtual) {
 
     if (dentroDoRaio && !jaAlertados.has(lugar.id)) {
       jaAlertados.add(lugar.id);
-      falar(`Há um${lugar.tipo === "farmacia" || lugar.tipo === "oficina" ? "a" : ""} ${TIPOS[lugar.tipo].rotulo.toLowerCase()} a ${formatarDistancia(lugar.distancia)}: ${lugar.nome}.`);
+
+      // Quais categorias da lista fazem sentido comprar nesse tipo de
+      // loja (função vem de voz.js — script irmão, mesmo escopo
+      // global, mesmo padrão já usado em outras partes do projeto).
+      const categoriasAtendidas =
+        typeof listarCategoriasComPendentes === "function"
+          ? listarCategoriasComPendentes().filter((c) =>
+              (CATEGORIA_PARA_TIPOS[c.id] || ["mercado"]).includes(lugar.tipo)
+            )
+          : [];
+      const nomesCategorias = categoriasAtendidas.map((c) => c.nome).join(", ");
+      const mencaoItens = nomesCategorias
+        ? `Você tem itens de ${nomesCategorias} na sua lista de compras. `
+        : "";
+
+      // O microfone não pode ligar sozinho aqui (exige toque humano) —
+      // por isso o convite falado, em vez de já entrar ouvindo.
+      falar(
+        `${mencaoItens}${TIPOS[lugar.tipo].rotulo} a ${formatarDistancia(lugar.distancia)}: ${lugar.nome}. ` +
+          `Toque no microfone para ouvir sua lista.`
+      );
     }
 
     const li = document.createElement("li");
@@ -258,19 +365,15 @@ botaoToggle.addEventListener("click", () => {
   ativo ? desativarDeteccao() : ativarDeteccao();
 });
 
-tiposContainer.addEventListener("click", (e) => {
-  const chip = e.target.closest(".tipo-chip");
-  if (!chip) return;
-  const tipo = chip.dataset.tipo;
-
-  if (tiposAtivos.has(tipo)) {
-    tiposAtivos.delete(tipo);
-    chip.classList.remove("tipo-ativo");
-  } else {
-    tiposAtivos.add(tipo);
-    chip.classList.add("tipo-ativo");
-  }
-
-  // Muda a seleção de tipos = precisa buscar de novo na próxima atualização de posição
+// Se a lista de compras mudar (item adicionado/comprado/removido) enquanto
+// a detecção já está ativa, os tipos de loja necessários podem mudar —
+// força uma nova busca na próxima atualização de posição.
+document.addEventListener("lista-compras-atualizada", () => {
   ultimaBusca = { lat: null, lon: null, timestamp: 0 };
 });
+
+// --- Inicialização: liga sozinho, sem precisar tocar em "Ativar" ---
+// (o navegador ainda vai pedir a permissão de localização normalmente
+// na primeira vez — isso é controlado pelo próprio sistema, não por
+// este botão; o botão continua servindo para desligar manualmente.)
+ativarDeteccao();

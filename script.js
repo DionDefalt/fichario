@@ -70,6 +70,9 @@ function carregarItens() {
 
 function salvarItens() {
   localStorage.setItem(CHAVE_STORAGE, JSON.stringify(itens));
+  // Avisa outros módulos (ex: proximidade.js) que a lista mudou, para
+  // que possam recalcular o que depende dela (quais lojas buscar, etc.)
+  document.dispatchEvent(new Event("lista-compras-atualizada"));
 }
 
 function carregarCategorias() {
