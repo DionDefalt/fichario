@@ -36,8 +36,40 @@ const SUGESTOES_CATEGORIA = [
   { id: "congelados", nome: "Congelados", emoji: "🧊" },
 ];
 
+// Cor de fundo do "selo" colorido atrás do emoji, no catálogo de
+// categorias — puramente decorativo (visual), uma por categoria,
+// pra cada card ficar fácil de diferenciar rapidamente na grade.
+const COR_BADGE_CATEGORIA = {
+  mercado: "#dcefe0",
+  farmacia: "#fbdfe4",
+  oficina: "#dde6f0",
+  padaria: "#f8e3cd",
+  fastfood: "#fbe0d6",
+  guloseimas: "#fbdcea",
+  sobremesas: "#fde1e1",
+  vestuario: "#e3ecdf",
+  calcados: "#e8e0f5",
+  papelaria: "#dbe9fb",
+  eletronicos: "#dde3f0",
+  hortifruti: "#e1f0da",
+  laticinios: "#fbf0d0",
+  limpeza: "#e2f3ef",
+  higiene: "#fce3ee",
+  bebidas: "#fbdcdc",
+  pet: "#ece0d4",
+  brinquedos: "#fdefd0",
+  ferramentas: "#e5ece6",
+  presentes: "#fbdfe0",
+  moveis: "#dfece8",
+  livros: "#dde6f2",
+  automotivo: "#fbdedb",
+  jardinagem: "#e3f0da",
+  congelados: "#dcebf5",
+};
+
 const lista = document.getElementById("lista");
 const mensagemVazia = document.getElementById("mensagem-vazia");
+const mensagemVaziaTexto = document.getElementById("mensagem-vazia-texto");
 const form = document.getElementById("form-adicionar");
 const inputItem = document.getElementById("input-item");
 const inputBusca = document.getElementById("input-busca");
@@ -162,7 +194,12 @@ function renderizarCatalogoCategorias() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "catalogo-item" + (ativa ? " catalogo-item-ativo" : "");
-    btn.innerHTML = `${sugestao.emoji} ${sugestao.nome}`;
+    const cor = COR_BADGE_CATEGORIA[sugestao.id] || "#eee";
+    btn.innerHTML = `
+      <span class="catalogo-selo" style="background:${cor}">${sugestao.emoji}</span>
+      <span class="catalogo-nome">${sugestao.nome}</span>
+      <span class="catalogo-seta">${ativa ? "✓" : "›"}</span>
+    `;
     btn.addEventListener("click", () => {
       if (ativa) {
         desativarCategoria(sugestao.id);
@@ -251,8 +288,8 @@ function renderizar() {
   lista.innerHTML = "";
 
   if (itensFiltrados.length === 0) {
-    mensagemVazia.style.display = "block";
-    mensagemVazia.textContent = mensagemParaListaVazia();
+    mensagemVazia.style.display = "flex";
+    mensagemVaziaTexto.textContent = mensagemParaListaVazia();
   } else {
     mensagemVazia.style.display = "none";
 

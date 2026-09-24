@@ -1,11 +1,12 @@
 :root {
-  --papel: #eff3f0;
+  --papel: #fbf6ee;
   --papel-alt: #ffffff;
-  --linha: #d9e2dc;
-  --tinta: #20302b;
-  --tinta-suave: #5f7268;
-  --marca: #1f6f5c;
-  --marca-clara: #e4f0ec;
+  --linha: #e9dfc9;
+  --tinta: #1f2e23;
+  --tinta-suave: #7a7263;
+  --marca: #2e8b57;
+  --marca-clara: #e3f3e7;
+  --acento: #e8a33d;
 
   --cat-hortifruti: #6b9b5e;
   --cat-laticinios: #d9a441;
@@ -20,13 +21,14 @@
 
 /* --- Modo escuro --- */
 body.tema-escuro {
-  --papel: #17211d;
-  --papel-alt: #1f2b26;
-  --linha: #33443d;
+  --papel: #1b2420;
+  --papel-alt: #232e28;
+  --linha: #3a4a3e;
   --tinta: #e9f1ec;
   --tinta-suave: #93a69d;
   --marca: #4bbf9c;
   --marca-clara: #1f3a32;
+  --acento: #f0b955;
   color-scheme: dark;
 }
 
@@ -99,7 +101,21 @@ body {
   font-size: 24px;
   font-weight: 700;
   margin: 0;
-  color: var(--marca);
+  color: var(--tinta);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+}
+
+.cabecalho h1::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  bottom: 0;
+  width: 70%;
+  height: 4px;
+  background: var(--acento);
+  border-radius: 99px;
 }
 
 .cabecalho-acoes {
@@ -238,8 +254,22 @@ body {
 .modal-topo h2 {
   font-family: var(--fonte-titulo);
   font-size: 18px;
-  color: var(--marca);
+  color: var(--tinta);
   margin: 0;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.modal-topo h2::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  bottom: 0;
+  width: 65%;
+  height: 3px;
+  background: var(--acento);
+  border-radius: 99px;
 }
 
 .modal-dica {
@@ -255,23 +285,59 @@ body {
 }
 
 .catalogo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--fonte-corpo);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 10px 8px;
-  border-radius: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
   border: 1.5px solid var(--linha);
-  background: var(--papel);
-  color: var(--tinta-suave);
+  background: var(--papel-alt);
+  color: var(--tinta);
   cursor: pointer;
   text-align: left;
 }
 
+.catalogo-selo {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.catalogo-nome {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogo-seta {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+
 .catalogo-item-ativo {
-  background: var(--marca-clara);
   border-color: var(--marca);
+  background: var(--marca-clara);
+}
+
+.catalogo-item-ativo .catalogo-nome {
   color: var(--marca);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.catalogo-item-ativo .catalogo-seta {
+  color: var(--marca);
+  font-weight: 700;
 }
 
 /* --- Lista --- */
@@ -285,11 +351,34 @@ body {
 }
 
 .mensagem-vazia {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 44px 20px 30px;
+}
+
+.mensagem-vazia-icone {
+  font-size: 56px;
+  line-height: 1;
+  position: relative;
+}
+
+.mensagem-vazia-icone::before {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  background: radial-gradient(circle, var(--marca-clara) 0%, transparent 70%);
+  z-index: -1;
+  border-radius: 50%;
+}
+
+.mensagem-vazia-texto {
   text-align: center;
   color: var(--tinta-suave);
   font-size: 14px;
-  padding: 40px 20px;
-  display: none;
+  margin: 0;
+  max-width: 260px;
 }
 
 .item {
