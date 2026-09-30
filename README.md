@@ -6,7 +6,7 @@ Projeto irmão do [Fichário](https://github.com/DionDefalt) original (mesma sta
 
 ## ✨ Funcionalidades
 
-- Adicionar item com categoria e quantidade — **categorias são criadas pelo próprio usuário** (botão "+ Nova categoria", com sugestões prontas como Mercado, Farmácia, Padaria, Bebidas, Pet etc., ou nome livre), cada uma com uma cor própria usada na borda lateral dos itens
+- Adicionar item com categoria e quantidade — **categorias dinâmicas**: escolha entre 25 sugestões (Mercado, Farmácia, Vestuário, Eletrônicos, Pet, e outras) no catálogo "+ Categoria", ativando só as que você usa
 - Marcar item como comprado (com indicador visual e progresso geral)
 - **Editar um item já adicionado** (nome, categoria e quantidade), sem precisar excluir e recriar
 - Filtrar a lista por categoria — na visão "Todos", os itens aparecem **agrupados por categoria** com cabeçalhos, mais fácil de escanear
@@ -17,15 +17,16 @@ Projeto irmão do [Fichário](https://github.com/DionDefalt) original (mesma sta
 - **Exportar/compartilhar a lista** — usa o compartilhamento nativo do celular quando disponível, ou abre o WhatsApp com a lista pronta como alternativa
 - Dados persistem entre sessões (localStorage) — a lista continua lá mesmo se você fechar o navegador
 - Layout pensado para celular: barra de adicionar fixa na parte inferior (alcance de polegar), botões grandes o suficiente pra toque
-- **📍 Perto de mim**: detecta supermercados, padarias, farmácias e oficinas próximos usando dados abertos do OpenStreetMap, com aviso por voz quando você entra no raio configurado
-- **🎤 Adicionar por voz**: fale "adicionar duas maçãs" e o item entra na lista já com a quantidade certa e na categoria certa (Hortifruti é criada/reaproveitada automaticamente), por reconhecimento de palavra-chave e de número por extenso
+- **📍 Perto de mim**: ativa sozinho ao abrir o app e detecta, entre 19 tipos de loja no OpenStreetMap, só os que correspondem às categorias com itens pendentes na sua lista (um item de Farmácia nunca te manda pra uma oficina)
+- **🎤 Adicionar por voz**: fale "adicionar duas maçãs" e o item entra na lista já com a quantidade certa, na categoria certa, por reconhecimento de palavra-chave e de número por extenso
+- **🗣️ Assistente de voz conversacional**: pergunte "quais listas tem itens", o app fala as categorias pendentes, você escolhe uma para ouvir os itens, e confirma a compra com "comprei tudo" (ou "comprei tudo, menos X" para deixar uma exceção) — o app avança sozinho para a próxima categoria pendente
 
 ## 📍 Como funciona o "Perto de mim"
 
-1. Ative a detecção (pede permissão de localização do navegador)
-2. Escolha quais tipos de lugar te interessam (mercado, padaria, farmácia, oficina) e o raio de aviso
-3. O app busca, via [Overpass API](https://overpass-api.de/) (OpenStreetMap, gratuita e sem chave), os lugares desses tipos num raio de 2km da sua posição
-4. Conforme você se movimenta, quando entra no raio de aviso configurado para um lugar, o app **fala em voz alta** um aviso
+1. Liga sozinho ao abrir o app (só pede a permissão de localização do navegador, controlada pelo próprio sistema)
+2. O app olha os itens **ainda não comprados** da sua lista e decide sozinho quais tipos de loja faz sentido buscar — um item de categoria "Higiene" busca Farmácia e Mercado; um item de "Farmácia" busca só Farmácia, nunca Mercado ou Oficina
+3. Busca, via [Overpass API](https://overpass-api.de/) (OpenStreetMap, gratuita e sem chave), os lugares desses tipos num raio de 2km da sua posição
+4. Conforme você se movimenta, quando uma categoria nova entra no raio de aviso configurado, o app **fala em voz alta** um aviso único e consolidado (não um por loja) — e sugere tocar no microfone para continuar a conversa direto, sem precisar dizer nenhum comando
 5. Toque no **card do lugar** para ver a ficha dele no Google Maps (foto, nota, horário — o que o Google tiver sobre aquele lugar específico, mostrado pelo próprio app gratuitamente). Toque no ícone 🧭 para pular direto para a **navegação de verdade**.
 
 **Sobre as fotos**: o OpenStreetMap não guarda fotos de fachada dos estabelecimentos — por isso, ao tocar no card, o app não mostra a foto diretamente; ele abre o Google Maps em modo busca, e é o **Google Maps quem busca e mostra a própria ficha dele** (com foto, se tiver), gratuitamente, no aparelho do usuário. Nunca chamamos uma API paga do Google — é o mesmo mecanismo gratuito de qualquer link "Ver no Google Maps" que existe pela internet.
@@ -34,15 +35,17 @@ Projeto irmão do [Fichário](https://github.com/DionDefalt) original (mesma sta
 
 ## 🎤 Como funciona o comando de voz
 
-Toque no ícone de microfone, fale algo como *"adicionar leite"* ou *"colocar detergente na lista"*, e o app:
+Toque no ícone de microfone. Dois modos, no mesmo botão:
+
+**Comando único** — fale algo como *"adicionar leite"* ou *"adicionar duas maçãs"*, e o app:
 1. Transcreve sua fala (via [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) do navegador, gratuita, sem servidor)
-2. Remove palavras de comando ("adicionar", "à lista", etc.), extraindo só o nome do item
-3. Categoriza o item por um dicionário de palavras-chave (o mesmo padrão do [Organizador de Arquivos](https://github.com/DionDefalt/organizador-arquivos): fácil de estender, edite o dicionário `PALAVRAS_POR_CATEGORIA` em `voz.js`) — como as categorias agora são dinâmicas (criadas pelo usuário), a categoria reconhecida (ex: "Hortifruti") é reaproveitada se já existir, ou **criada automaticamente** se tiver sido apagada
+2. Remove palavras de comando ("adicionar", "à lista", etc.) e extrai a quantidade falada (por extenso ou dígito)
+3. Categoriza o item por um dicionário de palavras-chave (fácil de estender, edite `PALAVRAS_POR_CATEGORIA` em `voz.js`) — se a categoria ainda não estiver ativa, o app a cria sozinho
 4. Adiciona o item e confirma por voz
 
-**Compatibilidade**: reconhecimento de voz funciona bem no Chrome (desktop e Android); no Safari/iPhone o suporte é limitado ou inexistente — nesse caso, o botão de microfone fica automaticamente escondido, em vez de aparecer e falhar sem explicação.
+**Modo conversa** — diga *"quais listas tem itens"*, e o app entra num vaivém de pergunta/resposta: fala as categorias pendentes, espera você escolher uma, lê os itens dela, e espera você confirmar com *"comprei tudo"* (ou *"comprei tudo, menos creme dental"*, pra deixar uma exceção pendente). Depois de cada categoria resolvida, o app já pergunta se você quer ouvir a próxima — sem precisar tocar no microfone de novo a cada resposta. Para sair a qualquer momento, diga "cancelar".
 
-Também reconhece quantidade falada: "adicionar duas maçãs" ou "adicionar 3 leites" já extraem a quantidade certa (por extenso ou dígito), sem precisar dizer só o nome do item.
+**Compatibilidade**: reconhecimento de voz funciona bem no Chrome (desktop e Android); no Safari/iPhone o suporte é limitado ou inexistente — nesse caso, o botão de microfone fica automaticamente escondido, em vez de aparecer e falhar sem explicação.
 
 ## 🖥️ Como usar
 
@@ -58,7 +61,7 @@ Depois acesse `http://localhost:8000` no navegador.
 
 ## 🎨 Identidade visual
 
-Paleta e tipografia pensadas para o domínio (organização doméstica): fundo claro e neutro, cor de categoria como sinalização (borda lateral colorida em cada item), e uma fonte de título mais descontraída (Baloo 2) combinada com uma fonte de corpo limpa e legível (Work Sans) para os itens da lista.
+Paleta quente (creme, dourado, verde) pensada para o domínio (organização doméstica), com sublinhado decorativo nos títulos e selos coloridos por categoria no catálogo. Fonte de título mais descontraída (Baloo 2) combinada com uma fonte de corpo limpa e legível (Work Sans). Modo escuro com a mesma identidade, mantendo o dourado como cor de destaque.
 
 ## 🧠 O que este projeto demonstra
 
@@ -76,9 +79,9 @@ Paleta e tipografia pensadas para o domínio (organização doméstica): fundo c
 
 ## 🚀 Próximos passos (ideias de evolução)
 
-- [ ] Múltiplas listas (ex: "Mercado" e "Farmácia" separadas)
 - [ ] Sincronizar a lista entre dispositivos (hoje é só local, por navegador)
 - [ ] Sugestão de itens recorrentes com base no histórico de compras
+- [ ] Reconhecer mais variações de fala no modo conversa (hoje cobre os comandos principais, mas não é um diálogo totalmente aberto)
 
 ---
 

@@ -66,7 +66,7 @@ const PALAVRAS_POR_CATEGORIA = {
   ],
   bebidas: [
     "refrigerante", "suco", "água", "agua", "cerveja", "vinho",
-    "energético", "energetico", "refresco", "chá pronto", "cha pronto", "cachaça",
+    "energético", "energetico", "refresco", "chá pronto", "cha pronto",
   ],
   farmacia: [
     "dipirona", "paracetamol", "antialérgico", "antialergico",
@@ -402,8 +402,22 @@ function iniciarEscuta() {
 
 const suportaReconhecimentoDeVoz = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
 
+function aoTocarNoMicrofone() {
+  // Se o usuário acabou de ouvir o aviso de proximidade ("toque no
+  // microfone pra ouvir o que falta..."), o toque deve ir DIRETO pra
+  // conversa sobre as categorias — sem isso, o app ficava esperando o
+  // usuário dizer algo em silêncio, e como ninguém sabe o comando
+  // certo de cor, parecia que "não acontecia nada" ao tocar.
+  if (window.aguardandoRespostaDeProximidade) {
+    window.aguardandoRespostaDeProximidade = false;
+    anunciarCategoriasPendentes();
+    return;
+  }
+  iniciarEscuta();
+}
+
 if (suportaReconhecimentoDeVoz) {
-  botaoVoz.addEventListener("click", iniciarEscuta); // único toque humano que a conversa toda depende
+  botaoVoz.addEventListener("click", aoTocarNoMicrofone); // único toque humano que a conversa toda depende
 } else {
   botaoVoz.hidden = true; // esconde em vez de mostrar um botão que sempre falharia (ex: Safari/iOS)
 }

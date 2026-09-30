@@ -31,7 +31,7 @@ const TIPOS = {
   livraria: { emoji: "📖", rotulo: "Livraria", tags: [["shop", "books"]] },
   autopecas: { emoji: "🚗", rotulo: "Loja de Autopeças", tags: [["shop", "car_parts"]] },
   jardinagem: { emoji: "🌱", rotulo: "Loja de Jardinagem", tags: [["shop", "garden_centre"]] },
-  bebidas: { emoji: "🥤", rotulo: "Deposito de Bebidas", tags: [["shop", "beverages"], ["shop", "convenience"]] },
+  bebidas: { emoji: "🥤", rotulo: "Loja de Bebidas", tags: [["shop", "beverages"]] },
 };
 
 // Mapeia cada CATEGORIA DE ITEM (as mesmas de SUGESTOES_CATEGORIA, em
@@ -103,7 +103,7 @@ let watchId = null;
 let ativo = false;
 let ultimaBusca = { lat: null, lon: null, timestamp: 0 };
 let lugaresEncontrados = [];
-let jaAlertados = new Set(); // ids de lugares já avisados nesta sessão (evita repetir o alerta toda hora)
+let categoriasAnunciadasPorVoz = new Set(); // categorias já anunciadas nesta sessão (evita repetir o aviso toda hora)
 
 function distanciaMetros(lat1, lon1, lat2, lon2) {
   // Fórmula de Haversine — distância em linha reta entre duas coordenadas.
@@ -242,33 +242,45 @@ function renderizarLista(posicaoAtual) {
 
   statusEl.textContent = `${comDistancia.length} lugar(es) encontrado(s) num raio de ${RAIO_BUSCA_METROS / 1000} km.`;
 
+  // --- Aviso por voz: um único anúncio consolidado, não um por loja ---
+  // Primeiro descobre quais CATEGORIAS (não lugares individuais) têm
+  // pelo menos um lugar dentro do raio de aviso agora.
+  const categoriasComLugarPerto = new Set();
+  comDistancia.forEach((lugar) => {
+    if (lugar.distancia > raioAlerta) return;
+    const categoriasAtendidas =
+      typeof listarCategoriasComPendentes === "function"
+        ? listarCategoriasComPendentes().filter((c) =>
+            (CATEGORIA_PARA_TIPOS[c.id] || ["mercado"]).includes(lugar.tipo)
+          )
+        : [];
+    categoriasAtendidas.forEach((c) => categoriasComLugarPerto.add(c.nome));
+  });
+
+  // Só anuncia as categorias que ainda não foram anunciadas nesta sessão.
+  const novasParaAnunciar = [...categoriasComLugarPerto].filter(
+    (nome) => !categoriasAnunciadasPorVoz.has(nome)
+  );
+
+  if (novasParaAnunciar.length > 0) {
+    novasParaAnunciar.forEach((nome) => categoriasAnunciadasPorVoz.add(nome));
+
+    const listaFalada = novasParaAnunciar.join(", ");
+    // O microfone não pode ligar sozinho aqui (exige toque humano) —
+    // por isso o convite falado, em vez de já entrar ouvindo. O toque
+    // no microfone, logo em seguida, já entra direto na conversa sobre
+    // essas categorias (ver "aguardandoRespostaDeProximidade" em voz.js).
+    falar(
+      `Você tem itens de ${listaFalada} na sua lista de compras, e há lugares perto daqui pra essas categorias. ` +
+        `Toque no microfone pra ouvir o que falta e escolher pra qual ir primeiro.`
+    );
+    if (typeof window !== "undefined") {
+      window.aguardandoRespostaDeProximidade = true;
+    }
+  }
+
   comDistancia.forEach((lugar) => {
     const dentroDoRaio = lugar.distancia <= raioAlerta;
-
-    if (dentroDoRaio && !jaAlertados.has(lugar.id)) {
-      jaAlertados.add(lugar.id);
-
-      // Quais categorias da lista fazem sentido comprar nesse tipo de
-      // loja (função vem de voz.js — script irmão, mesmo escopo
-      // global, mesmo padrão já usado em outras partes do projeto).
-      const categoriasAtendidas =
-        typeof listarCategoriasComPendentes === "function"
-          ? listarCategoriasComPendentes().filter((c) =>
-              (CATEGORIA_PARA_TIPOS[c.id] || ["mercado"]).includes(lugar.tipo)
-            )
-          : [];
-      const nomesCategorias = categoriasAtendidas.map((c) => c.nome).join(", ");
-      const mencaoItens = nomesCategorias
-        ? `Você tem itens de ${nomesCategorias} na sua lista de compras. `
-        : "";
-
-      // O microfone não pode ligar sozinho aqui (exige toque humano) —
-      // por isso o convite falado, em vez de já entrar ouvindo.
-      falar(
-        `${mencaoItens}${TIPOS[lugar.tipo].rotulo} a ${formatarDistancia(lugar.distancia)}: ${lugar.nome}. ` +
-          `Toque no microfone para ouvir sua lista.`
-      );
-    }
 
     const li = document.createElement("li");
     li.className = "perto-item" + (dentroDoRaio ? " perto-item-proximo" : "");
@@ -338,6 +350,7 @@ function ativarDeteccao() {
     return;
   }
   ativo = true;
+  categoriasAnunciadasPorVoz = new Set(); // reseta os avisos ao reativar, senão fica "mudo" achando que já avisou
   botaoToggle.textContent = "Desativar";
   configEl.hidden = false;
   statusEl.textContent = "Obtendo sua localização...";
