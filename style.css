@@ -852,3 +852,129 @@ body {
 @media (max-width: 360px) {
   .stepper-vertical { padding: 0 3px; }
 }
+
+/* --- Tela de login (Supabase Auth) --- */
+/* O auth.js troca o atributo data-auth do <body>: "verificando" (checando a
+   sessão guardada), "deslogado" (mostra a tela de login) ou "logado" (app). */
+body:not([data-auth="logado"]) .app,
+body:not([data-auth="logado"]) .barra-adicionar {
+  display: none;
+}
+
+.tela-login {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--papel);
+  overflow-y: auto;
+}
+
+body[data-auth="deslogado"] .tela-login {
+  display: flex;
+}
+
+.login-caixa {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px 22px;
+  text-align: center;
+  background: var(--papel-alt);
+  border: 1.5px solid var(--linha);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+.login-icone {
+  font-size: 44px;
+}
+
+.login-caixa h1 {
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-size: 24px;
+  color: var(--tinta);
+}
+
+.login-subtitulo {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--tinta-suave);
+}
+
+.login-caixa label {
+  margin-top: 6px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.login-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 16px; /* 16px evita o zoom automático do iPhone ao focar */
+  color: var(--tinta);
+  background: var(--papel);
+  border: 1.5px solid var(--linha);
+  border-radius: 12px;
+}
+
+.login-input:focus {
+  outline: 2px solid var(--marca);
+  outline-offset: 1px;
+}
+
+.login-mensagem {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.login-mensagem[data-tipo="erro"] {
+  background: #fbe3e1;
+  color: #8a2a22;
+}
+
+.login-mensagem[data-tipo="info"] {
+  background: var(--marca-clara);
+  color: var(--marca);
+}
+
+.login-botao-principal,
+.login-botao-secundario {
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.login-botao-principal {
+  margin-top: 12px;
+  color: #fff;
+  background: var(--marca);
+  border: none;
+}
+
+.login-botao-secundario {
+  color: var(--tinta);
+  background: transparent;
+  border: 1.5px solid var(--linha);
+}
+
+.login-caixa button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

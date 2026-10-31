@@ -389,4 +389,12 @@ document.addEventListener("lista-compras-atualizada", () => {
 // (o navegador ainda vai pedir a permissão de localização normalmente
 // na primeira vez — isso é controlado pelo próprio sistema, não por
 // este botão; o botão continua servindo para desligar manualmente.)
-ativarDeteccao();
+// Só liga depois do login: antes disso o app está escondido atrás da tela
+// de entrada, e o pedido de localização apareceria sem contexto. O auth.js
+// define window.usuarioAtual antes de disparar "usuario-logado", então
+// funciona mesmo que o login termine antes deste script carregar.
+if (window.usuarioAtual) {
+  ativarDeteccao();
+} else {
+  document.addEventListener("usuario-logado", () => ativarDeteccao(), { once: true });
+}
