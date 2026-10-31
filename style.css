@@ -978,3 +978,46 @@ body[data-auth="deslogado"] .tela-login {
   opacity: 0.6;
   cursor: wait;
 }
+
+/* --- Carregamento e avisos de sincronização (Supabase) --- */
+/* Enquanto a lista não carregou (ou falhou ao carregar), bloqueia o formulário
+   de adicionar para não perder itens digitados antes da hora. */
+body:not([data-dados="pronto"]) .barra-adicionar {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+body[data-dados="carregando"] .lista-container {
+  opacity: 0.5;
+}
+
+.aviso-sync {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 92vw;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--tinta);
+  background: var(--papel-alt);
+  border: 1.5px solid var(--acento);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.aviso-sync button {
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--marca);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

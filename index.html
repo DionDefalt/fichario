@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-auth="verificando">
+<body data-auth="verificando" data-dados="carregando">
   <!-- Tela de entrada (Supabase Auth). O CSS mostra esta tela ou o app
        conforme o atributo data-auth do <body>, controlado pelo auth.js. -->
   <div class="tela-login" id="tela-login">
@@ -30,6 +30,12 @@
       <button type="submit" class="login-botao-principal" id="login-entrar">Entrar</button>
       <button type="button" class="login-botao-secundario" id="login-criar">Criar conta</button>
     </form>
+  </div>
+
+  <!-- Avisos de conexão com o Supabase (carregar/salvar). Controlado pelo script.js. -->
+  <div class="aviso-sync" id="aviso-sync" role="status" hidden>
+    <span id="aviso-sync-texto"></span>
+    <button type="button" id="aviso-sync-botao" hidden></button>
   </div>
 
   <div class="app">
@@ -124,6 +130,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
+  <script src="dados.js"></script>
   <script src="script.js"></script>
   <script src="proximidade.js"></script>
   <script src="voz.js"></script>

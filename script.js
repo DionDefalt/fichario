@@ -1,4 +1,6 @@
-// Lista de Compras — persistência local via localStorage, sem backend.
+// Lista de Compras — a lista fica na conta do usuário, no Supabase (ver dados.js).
+// O localStorage guarda só preferências deste aparelho (tema, categorias ativas)
+// e, no primeiro acesso, os itens antigos que podem ser importados.
 
 const CHAVE_STORAGE = "lista-compras-itens";
 const CHAVE_TEMA = "lista-compras-tema";
@@ -83,14 +85,16 @@ const botaoTema = document.getElementById("botao-tema");
 const progressoTexto = document.getElementById("progresso-texto");
 const progressoPreenchido = document.getElementById("progresso-preenchido");
 
-let itens = carregarItens();
+let itens = []; // preenchida por iniciarDados() depois do login
 let categoriasAtivas = carregarCategorias();
 let quantidadeAtual = 1;
 let filtroAtivo = "todos";
 let termoBusca = "";
 let itemEmEdicaoId = null;
 
-function carregarItens() {
+// Lê os itens que a versão anterior do app guardava neste aparelho.
+// Hoje só serve para a importação do primeiro acesso.
+function lerItensLocais() {
   try {
     const salvo = localStorage.getItem(CHAVE_STORAGE);
     return salvo ? JSON.parse(salvo) : [];
@@ -101,7 +105,11 @@ function carregarItens() {
 }
 
 function salvarItens() {
-  localStorage.setItem(CHAVE_STORAGE, JSON.stringify(itens));
+  // Agenda o envio ao Supabase (dados.js compara com o que o servidor já tem).
+  // Antes de a lista carregar não há o que salvar.
+  if (document.body.dataset.dados === "pronto") {
+    Dados.agendar(() => itens);
+  }
   // Avisa outros módulos (ex: proximidade.js) que a lista mudou, para
   // que possam recalcular o que depende dela (quais lojas buscar, etc.)
   document.dispatchEvent(new Event("lista-compras-atualizada"));
@@ -121,8 +129,14 @@ function salvarCategorias() {
   localStorage.setItem(CHAVE_CATEGORIAS, JSON.stringify(categoriasAtivas));
 }
 
+// O banco usa UUID como id do item, então o id nasce já nesse formato.
 function gerarId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
 function escaparHTML(texto) {
@@ -594,3 +608,110 @@ aplicarTema(temaInicial());
 renderizarFiltros();
 atualizarPlaceholder();
 renderizar();
+
+// --- Dados no Supabase (a camada de acesso ao banco está em dados.js) ---
+
+const avisoSync = document.getElementById("aviso-sync");
+const avisoSyncTexto = document.getElementById("aviso-sync-texto");
+const avisoSyncBotao = document.getElementById("aviso-sync-botao");
+let aoClicarNoAviso = null;
+
+function mostrarAviso(texto, botao) {
+  avisoSyncTexto.textContent = texto;
+  if (botao) {
+    avisoSyncBotao.textContent = botao.rotulo;
+    avisoSyncBotao.hidden = false;
+    aoClicarNoAviso = botao.aoClicar;
+  } else {
+    avisoSyncBotao.hidden = true;
+    aoClicarNoAviso = null;
+  }
+  avisoSync.hidden = false;
+}
+
+function esconderAviso() {
+  avisoSync.hidden = true;
+}
+
+avisoSyncBotao.addEventListener("click", () => {
+  if (aoClicarNoAviso) aoClicarNoAviso();
+});
+
+// Falha ao gravar: a lista continua na tela e o dados.js tenta de novo sozinho.
+Dados.aoMudarStatus = (estado) => {
+  if (estado === "erro") {
+    mostrarAviso("Não foi possível salvar as últimas alterações. Tentando de novo...");
+  } else {
+    esconderAviso();
+  }
+};
+
+// Se ainda há alteração sem salvar, o navegador pergunta antes de fechar a aba.
+window.addEventListener("beforeunload", (e) => {
+  if (Dados.temPendencias()) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+// Primeiro acesso com itens guardados só neste aparelho: oferece levar para a
+// conta. A resposta é lembrada por usuário, então a pergunta não se repete.
+// Os itens antigos continuam no localStorage como cópia de segurança.
+async function oferecerImportacaoLocal() {
+  const chave = `lista-compras-importacao:${window.usuarioAtual.id}`;
+  if (localStorage.getItem(chave)) return [];
+
+  const locais = lerItensLocais().filter(
+    (item) => item && typeof item.nome === "string" && item.nome.trim()
+  );
+  if (locais.length === 0) return [];
+
+  const quantos = locais.length === 1 ? "1 item salvo" : `${locais.length} itens salvos`;
+  const aceitou = window.confirm(`Encontramos ${quantos} neste aparelho. Importar para a sua conta?`);
+  if (!aceitou) {
+    localStorage.setItem(chave, "recusado");
+    return [];
+  }
+
+  const importados = await Dados.importar(locais);
+  localStorage.setItem(chave, "importado"); // só depois de dar certo
+  return importados;
+}
+
+async function iniciarDados() {
+  document.body.dataset.dados = "carregando";
+  esconderAviso();
+
+  try {
+    let carregados = await Dados.carregar();
+    if (carregados.length === 0) carregados = await oferecerImportacaoLocal();
+
+    // As categorias ativas ficam neste aparelho. Garante que as usadas pelos
+    // itens vindos da conta estejam ativas aqui, senão eles ficariam invisíveis.
+    carregados.forEach((item) => {
+      item.categoria = garantirCategoriaExiste(item.categoria);
+    });
+
+    itens = carregados;
+    document.body.dataset.dados = "pronto";
+    renderizarFiltros();
+    atualizarPlaceholder();
+    renderizar();
+    document.dispatchEvent(new Event("lista-compras-atualizada"));
+  } catch (erro) {
+    console.error("Não foi possível carregar a lista:", erro);
+    document.body.dataset.dados = "erro";
+    mostrarAviso("Não foi possível carregar sua lista.", {
+      rotulo: "Tentar de novo",
+      aoClicar: iniciarDados,
+    });
+  }
+}
+
+// O auth.js define window.usuarioAtual antes de disparar "usuario-logado",
+// então funciona mesmo que o login termine antes deste script carregar.
+if (window.usuarioAtual) {
+  iniciarDados();
+} else {
+  document.addEventListener("usuario-logado", () => iniciarDados(), { once: true });
+}

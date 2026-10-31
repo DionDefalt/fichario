@@ -133,6 +133,18 @@ async function criarConta() {
 }
 
 async function sair() {
+  // Salva o que ainda estiver pendente antes de encerrar a sessão — depois
+  // de sair o banco não aceita mais gravações deste usuário.
+  if (typeof Dados !== "undefined") {
+    try {
+      await Dados.sincronizarAgora();
+    } catch (erro) {
+      const sairMesmoAssim = window.confirm(
+        "Não foi possível salvar as últimas alterações (sem conexão?). Sair mesmo assim e perdê-las?"
+      );
+      if (!sairMesmoAssim) return;
+    }
+  }
   await supabaseClient.auth.signOut();
   // Recarrega a página para zerar todo o estado em memória (lista, localização,
   // conversa por voz) e não deixar nada da sessão anterior para trás.
