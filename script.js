@@ -654,7 +654,7 @@ window.addEventListener("beforeunload", (e) => {
   }
 });
 
-// Primeiro acesso com itens guardados só neste aparelho: oferece levar para a
+// Itens guardados só neste aparelho (versão antiga do app): oferece levar para a
 // conta. A resposta é lembrada por usuário, então a pergunta não se repete.
 // Os itens antigos continuam no localStorage como cópia de segurança.
 async function oferecerImportacaoLocal() {
@@ -684,7 +684,10 @@ async function iniciarDados() {
 
   try {
     let carregados = await Dados.carregar();
-    if (carregados.length === 0) carregados = await oferecerImportacaoLocal();
+    // Itens antigos deste aparelho são oferecidos mesmo que a conta já tenha
+    // itens. Os importados são os mais novos, então entram no topo da lista.
+    const importados = await oferecerImportacaoLocal();
+    if (importados.length > 0) carregados = importados.concat(carregados);
 
     // As categorias ativas ficam neste aparelho. Garante que as usadas pelos
     // itens vindos da conta estejam ativas aqui, senão eles ficariam invisíveis.
