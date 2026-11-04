@@ -1,41 +1,57 @@
+/* Lista de Compras — tema verde e dourado.
+   As cores ficam em variáveis; o modo escuro só troca os valores. */
 :root {
-  --papel: #fbf6ee;
-  --papel-alt: #ffffff;
-  --linha: #e9dfc9;
-  --tinta: #1f2e23;
-  --tinta-suave: #7a7263;
-  --marca: #2e8b57;
-  --marca-clara: #e3f3e7;
-  --acento: #e8a33d;
+  --papel: #f0f9f2;
+  --papel-alt: #fbfffc;
+  --linha: #d3ebd9;
+  --borda-forte: #aed3b7;
+  --tinta: #173323;
+  --tinta-suave: #5a7b66;
+  --marca: #1f8a4c;
+  --marca-clara: #dcf3e3;
+  --botao: #26994f;
+  --botao-2: #45b873;
+  --acento: #d4a03c;
+  --ok: #1f8a3b;
+  --sombra: 0 6px 18px rgba(20, 85, 45, 0.12);
+  --sombra-leve: 0 2px 8px rgba(20, 85, 45, 0.1);
+  --padrao-cesta: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'%3E%3Cg fill='none' stroke='%23b3d8bb' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 40h100l-10 52H20z M30 40l16-26M90 40L74 14M38 56v24M60 56v24M82 56v24'/%3E%3C/g%3E%3C/svg%3E");
+  --altura-nav: 66px;
 
   --cat-hortifruti: #6b9b5e;
   --cat-laticinios: #d9a441;
   --cat-limpeza: #4f8fbf;
   --cat-higiene: #c97ba0;
-  --cat-outros: #8b8378;
+  --cat-outros: #8fae9b;
 
-  --fonte-titulo: 'Baloo 2', system-ui, sans-serif;
+  --fonte-titulo: 'Poppins', system-ui, sans-serif;
   --fonte-corpo: 'Work Sans', system-ui, sans-serif;
   color-scheme: light;
 }
 
 /* --- Modo escuro --- */
 body.tema-escuro {
-  --papel: #1b2420;
-  --papel-alt: #232e28;
-  --linha: #3a4a3e;
-  --tinta: #e9f1ec;
-  --tinta-suave: #93a69d;
-  --marca: #4bbf9c;
-  --marca-clara: #1f3a32;
-  --acento: #f0b955;
+  --papel: #182b20;
+  --papel-alt: #22392b;
+  --linha: #3b5a46;
+  --borda-forte: #547a62;
+  --tinta: #f0fbf3;
+  --tinta-suave: #b9d6c3;
+  --marca: #86e0a6;
+  --marca-clara: #2b4a37;
+  --botao: #26994f;
+  --botao-2: #45b873;
+  --acento: #e8b655;
+  --ok: #2fa04e;
+  --sombra: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --sombra-leve: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --padrao-cesta: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'%3E%3Cg fill='none' stroke='%23365443' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 40h100l-10 52H20z M30 40l16-26M90 40L74 14M38 56v24M60 56v24M82 56v24'/%3E%3C/g%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
 body,
 .item,
-.perto-de-mim,
-.perto-item,
+.cartao,
 .barra-adicionar,
 .input-item,
 .input-busca,
@@ -44,9 +60,9 @@ body,
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* --- Corrige texto preto em <select> no modo escuro (bug conhecido do
+/* Corrige texto preto em <select> no modo escuro (bug conhecido do
    Chrome/Android: sem "color-scheme", o navegador ignora a cor definida
-   via CSS no valor selecionado, mesmo com o fundo já escuro) --- */
+   via CSS no valor selecionado, mesmo com o fundo já escuro). */
 body.tema-escuro .select-raio,
 body.tema-escuro .edicao-categoria {
   color-scheme: dark;
@@ -57,11 +73,8 @@ body.tema-escuro .edicao-categoria {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Garante que o atributo "hidden" sempre esconda o elemento de
-   verdade, mesmo quando a classe dele também define "display"
-   explicitamente (ex: display:flex nos botões de ícone) — sem essa
-   regra, a declaração de display da classe teria prioridade sobre o
-   [hidden] padrão do navegador, deixando o elemento visível por engano. */
+/* Garante que o atributo "hidden" sempre esconda o elemento de verdade,
+   mesmo quando a classe dele também define "display" explicitamente. */
 [hidden] {
   display: none !important;
 }
@@ -76,93 +89,178 @@ body {
   flex-direction: column;
 }
 
+/* Cestinhas desenhadas bem de leve nas laterais, só como textura de fundo. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    var(--padrao-cesta) -46px 44% / 130px no-repeat,
+    var(--padrao-cesta) calc(100% + 40px) 60% / 130px no-repeat,
+    var(--padrao-cesta) -46px 82% / 130px no-repeat;
+}
+
+svg {
+  display: block;
+}
+
 .app {
   flex: 1;
-  padding: 20px 16px 100px;
+  padding: 0 16px calc(var(--altura-nav) + 100px + env(safe-area-inset-bottom));
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* --- Cabeçalho --- */
+/* --- Cabeçalho (faixa verde com onda dourada) --- */
 .cabecalho {
-  margin-bottom: 18px;
+  position: relative;
+  margin: 0 -16px;
+  padding: 24px 16px 70px;
+  color: #fff;
+  background:
+    radial-gradient(150px 100px at 84% 80%, rgba(255, 150, 70, 0.5), transparent 70%),
+    linear-gradient(135deg, #1c8248 0%, #2fa561 52%, #5cc98c 100%);
+  overflow: hidden;
 }
 
-.cabecalho-titulo {
+.cabecalho-marca {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.logo {
+  width: 54px;
+  height: 48px;
+  flex-shrink: 0;
 }
 
 .cabecalho h1 {
+  margin: 0;
   font-family: var(--fonte-titulo);
   font-size: 24px;
   font-weight: 700;
-  margin: 0;
-  color: var(--tinta);
-  position: relative;
-  display: inline-block;
-  padding-bottom: 6px;
+  line-height: 1.1;
+  color: #fff;
 }
 
-.cabecalho h1::after {
-  content: "";
+.cabecalho-texto {
+  max-width: 210px;
+}
+
+.cabecalho-subtitulo {
+  margin: 5px 0 0;
+  font-family: var(--fonte-titulo);
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: #eafaef;
+}
+
+.cabecalho-traco {
+  width: 110px;
+  height: 9px;
+  margin-top: 2px;
+}
+
+.botao-tema {
   position: absolute;
-  left: 2px;
-  bottom: 0;
-  width: 70%;
-  height: 4px;
-  background: var(--acento);
-  border-radius: 99px;
-}
-
-.cabecalho-acoes {
-  display: flex;
-  gap: 6px;
-}
-
-.botao-icone {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1.5px solid var(--linha);
-  background: var(--papel-alt);
-  font-size: 16px;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1.5px solid var(--acento);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 19px;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.input-busca {
-  width: 100%;
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--linha);
-  background: var(--papel-alt);
-  color: var(--tinta);
-  font-family: var(--fonte-corpo);
-  font-size: 14px;
-  margin-top: 12px;
+.cabecalho-cesta {
+  position: absolute;
+  right: 8px;
+  bottom: 22px;
+  width: 140px;
+  height: auto;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
 }
 
-.input-busca:focus {
-  outline: none;
-  border-color: var(--marca);
+.cabecalho-onda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 44px;
+}
+
+.cabecalho-onda .onda-fundo {
+  fill: var(--papel);
+  transition: fill 0.2s ease;
+}
+
+/* --- Cartões (progresso e "Perto de mim") --- */
+.cartao {
+  background: var(--papel-alt);
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  box-shadow: var(--sombra);
+}
+
+.cartao-progresso {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: -8px;
+  padding: 16px 18px;
+}
+
+.progresso-icone {
+  width: auto;
+  height: 58px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 5px rgba(20, 70, 40, 0.25));
+}
+
+.progresso-corpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.progresso-titulo {
+  font-family: var(--fonte-titulo);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--marca);
 }
 
 .progresso-texto {
-  font-size: 13px;
-  color: var(--tinta-suave);
-  margin-bottom: 6px;
-  font-weight: 500;
+  font-size: 14px;
+  color: var(--tinta);
+  margin: 1px 0 8px;
+}
+
+.progresso-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .progresso-barra {
-  height: 8px;
+  flex: 1;
+  height: 12px;
   background: var(--linha);
   border-radius: 99px;
   overflow: hidden;
@@ -170,73 +268,116 @@ body {
 
 .progresso-preenchido {
   height: 100%;
-  background: var(--marca);
   width: 0%;
+  background: linear-gradient(90deg, var(--botao), var(--botao-2));
   border-radius: 99px;
   transition: width 0.35s ease;
+}
+
+.progresso-percentual {
+  min-width: 38px;
+  text-align: right;
+  font-family: var(--fonte-titulo);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--marca);
+}
+
+/* --- Busca --- */
+.busca {
+  position: relative;
+  margin-top: 16px;
+}
+
+.busca-icone {
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  color: var(--marca);
+  pointer-events: none;
+}
+
+.input-busca {
+  width: 100%;
+  height: 50px;
+  padding: 0 18px 0 49px;
+  border-radius: 99px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel-alt);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 15px;
+  box-shadow: var(--sombra-leve);
+}
+
+.input-busca::placeholder {
+  color: var(--tinta-suave);
+}
+
+.input-busca:focus {
+  outline: none;
+  border-color: var(--marca);
 }
 
 /* --- Filtros de categoria (chips roláveis) --- */
 .filtros {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 6px;
-  margin-bottom: 16px;
+  padding: 4px 2px 10px;
+  margin: 12px -2px 6px;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 .filtros::-webkit-scrollbar { display: none; }
 
-.filtros-wrapper {
-  position: relative;
-}
-
 .filtro {
   flex-shrink: 0;
   font-family: var(--fonte-corpo);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 8px 14px;
+  padding: 9px 16px;
   border-radius: 99px;
-  border: 1.5px solid var(--linha);
+  border: 1px solid var(--linha);
   background: var(--papel-alt);
-  color: var(--tinta-suave);
+  color: var(--tinta);
+  box-shadow: var(--sombra-leve);
   cursor: pointer;
 }
 
 .filtro-ativo {
-  background: var(--marca);
-  border-color: var(--marca);
-  color: white;
+  background: linear-gradient(135deg, var(--botao), var(--botao-2));
+  border-color: var(--botao);
+  color: #fff;
+  font-weight: 600;
 }
 
 .filtro-adicionar {
-  border-style: dashed;
+  border: 1.5px dashed var(--marca);
   background: transparent;
+  box-shadow: none;
   color: var(--marca);
   font-weight: 600;
 }
 
-/* --- Modal "Categorias" (catálogo com toque para ativar/desativar) --- */
+/* --- Modais (Categorias e Mais) --- */
 .modal-fundo {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(30, 5, 12, 0.55);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   z-index: 20;
 }
 
-.modal-fundo[hidden] {
-  display: none;
-}
-
 .modal-caixa {
   background: var(--papel-alt);
-  border-radius: 18px 18px 0 0;
+  border-radius: 22px 22px 0 0;
   padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
   width: 100%;
   max-width: 480px;
@@ -254,11 +395,12 @@ body {
 .modal-topo h2 {
   font-family: var(--fonte-titulo);
   font-size: 18px;
-  color: var(--tinta);
+  font-weight: 700;
+  color: var(--marca);
   margin: 0;
   position: relative;
   display: inline-block;
-  padding-bottom: 5px;
+  padding-bottom: 6px;
 }
 
 .modal-topo h2::after {
@@ -272,10 +414,25 @@ body {
   border-radius: 99px;
 }
 
+.botao-icone {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .modal-dica {
   font-size: 12.5px;
   color: var(--tinta-suave);
   margin: 0 0 14px;
+  word-break: break-all;
 }
 
 .catalogo-categorias {
@@ -294,7 +451,7 @@ body {
   padding: 8px 10px;
   border-radius: 12px;
   border: 1.5px solid var(--linha);
-  background: var(--papel-alt);
+  background: var(--papel);
   color: var(--tinta);
   cursor: pointer;
   text-align: left;
@@ -330,14 +487,45 @@ body {
   background: var(--marca-clara);
 }
 
-.catalogo-item-ativo .catalogo-nome {
+.catalogo-item-ativo .catalogo-nome,
+.catalogo-item-ativo .catalogo-seta {
   color: var(--marca);
   font-weight: 700;
 }
 
-.catalogo-item-ativo .catalogo-seta {
-  color: var(--marca);
-  font-weight: 700;
+.mais-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mais-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid var(--linha);
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-corpo);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mais-icone {
+  font-size: 20px;
+}
+
+.mais-item-sair {
+  color: #b3261e;
+}
+
+body.tema-escuro .mais-item-sair {
+  color: #ff8a80;
 }
 
 /* --- Lista --- */
@@ -347,63 +535,46 @@ body {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.mensagem-vazia {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 44px 20px 30px;
-}
-
-.mensagem-vazia-icone {
-  font-size: 56px;
-  line-height: 1;
-  position: relative;
-}
-
-.mensagem-vazia-icone::before {
-  content: "";
-  position: absolute;
-  inset: -22px;
-  background: radial-gradient(circle, var(--marca-clara) 0%, transparent 70%);
-  z-index: -1;
-  border-radius: 50%;
-}
-
-.mensagem-vazia-texto {
-  text-align: center;
-  color: var(--tinta-suave);
-  font-size: 14px;
-  margin: 0;
-  max-width: 260px;
+  gap: 10px;
 }
 
 .item {
+  --cor-item: var(--cat-outros);
   display: flex;
   align-items: center;
   gap: 12px;
   background: var(--papel-alt);
-  border-radius: 12px;
-  padding: 12px 14px;
-  border-left: 5px solid var(--cat-outros);
+  border: 1px solid var(--linha);
+  border-radius: 16px;
+  box-shadow: var(--sombra-leve);
+  padding: 12px 14px 12px 18px;
   position: relative;
 }
 
-.item[data-categoria="hortifruti"] { border-left-color: var(--cat-hortifruti); }
-.item[data-categoria="laticinios"] { border-left-color: var(--cat-laticinios); }
-.item[data-categoria="limpeza"] { border-left-color: var(--cat-limpeza); }
-.item[data-categoria="higiene"] { border-left-color: var(--cat-higiene); }
-.item[data-categoria="outros"] { border-left-color: var(--cat-outros); }
+/* Barrinha colorida da categoria, na lateral esquerda do cartão. */
+.item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 5px;
+  border-radius: 0 5px 5px 0;
+  background: var(--cor-item);
+}
+
+.item[data-categoria="hortifruti"] { --cor-item: var(--cat-hortifruti); }
+.item[data-categoria="laticinios"] { --cor-item: var(--cat-laticinios); }
+.item[data-categoria="limpeza"] { --cor-item: var(--cat-limpeza); }
+.item[data-categoria="higiene"] { --cor-item: var(--cat-higiene); }
+.item[data-categoria="outros"] { --cor-item: var(--cat-outros); }
 
 .item-checkbox {
   width: 26px;
   height: 26px;
   flex-shrink: 0;
   border-radius: 50%;
-  border: 2px solid var(--linha);
+  border: 2px solid var(--borda-forte);
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -414,8 +585,8 @@ body {
 }
 
 .item.comprado .item-checkbox {
-  background: var(--marca);
-  border-color: var(--marca);
+  background: var(--ok);
+  border-color: var(--ok);
   color: white;
 }
 
@@ -439,9 +610,9 @@ body {
 .item-qtd {
   display: inline-block;
   font-size: 11.5px;
-  color: var(--tinta-suave);
+  color: var(--marca);
   background: var(--marca-clara);
-  padding: 1px 7px;
+  padding: 1px 8px;
   border-radius: 99px;
   margin-top: 3px;
   font-weight: 600;
@@ -466,25 +637,89 @@ body {
 .item-editar:active,
 .item-excluir:active { background: var(--linha); }
 
-/* --- Cabeçalho de grupo (visão "Todos", agrupada por categoria) --- */
+/* Cabeçalho de grupo (visão "Todos", agrupada por categoria) */
 .grupo-cabecalho {
+  font-family: var(--fonte-titulo);
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--tinta-suave);
-  padding: 10px 4px 2px;
+  color: var(--marca);
+  padding: 10px 4px 0;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
 .grupo-cabecalho:first-child {
   padding-top: 0;
 }
 
+/* --- Estado vazio --- */
+.mensagem-vazia {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 10px 24px;
+  text-align: center;
+}
+
+.vazio-ilustracao {
+  width: 210px;
+  height: auto;
+  filter: drop-shadow(0 10px 10px rgba(20, 70, 40, 0.22));
+}
+
+.mensagem-vazia-titulo {
+  margin: 6px 0 6px;
+  font-family: var(--fonte-titulo);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--marca);
+}
+
+.mensagem-vazia-texto {
+  margin: 0;
+  max-width: 280px;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--tinta);
+}
+
+.vazio-seta {
+  width: 30px;
+  height: 34px;
+  margin: 10px 0 2px;
+  color: var(--marca);
+}
+
+.botao-primeiro-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 22px;
+  border: none;
+  border-radius: 99px;
+  background: linear-gradient(135deg, var(--botao), var(--botao-2));
+  color: #fff;
+  font-family: var(--fonte-titulo);
+  font-size: 16.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 18px rgba(20, 85, 45, 0.3);
+  cursor: pointer;
+}
+
+.botao-primeiro-item svg {
+  width: 22px;
+  height: 22px;
+}
+
 /* --- Edição inline de um item --- */
 .item-em-edicao {
   flex-wrap: wrap;
   gap: 8px;
-  border-left-color: var(--marca);
+  --cor-item: var(--marca);
 }
 
 .edicao-nome {
@@ -554,7 +789,7 @@ body {
 }
 
 .edicao-salvar {
-  background: var(--marca);
+  background: var(--botao);
   color: white;
 }
 
@@ -566,40 +801,131 @@ body {
 
 /* --- Perto de mim --- */
 .perto-de-mim {
-  background: var(--papel-alt);
-  border-radius: 14px;
   padding: 14px 16px;
-  margin-bottom: 16px;
-  border: 1px solid var(--linha);
+  margin-bottom: 18px;
 }
 
 .perto-cabecalho {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
-.perto-cabecalho h2 {
-  font-family: var(--fonte-titulo);
-  font-size: 16px;
+.perto-pin {
+  width: auto;
+  height: 38px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 4px rgba(20, 70, 40, 0.3));
+}
+
+.perto-textos {
+  flex: 1;
+  min-width: 0;
+}
+
+.perto-textos h2 {
   margin: 0;
-  color: var(--marca);
+  font-family: var(--fonte-titulo);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--tinta);
 }
 
-.botao-perto-toggle {
-  font-family: var(--fonte-corpo);
+.perto-textos p {
+  margin: 2px 0 0;
   font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--tinta-suave);
+}
+
+.perto-mapa {
+  width: 84px;
+  height: auto;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 5px rgba(20, 70, 40, 0.25));
+}
+
+/* O texto do botão ("Ativar"/"Desativar") é trocado pelo proximidade.js.
+   Ativar = botão verde com avião de papel; Desativar = botão só com contorno. */
+.botao-perto-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--fonte-titulo);
+  font-size: 14px;
   font-weight: 600;
-  padding: 7px 14px;
+  padding: 10px 16px;
   border-radius: 99px;
-  border: none;
-  background: var(--marca);
-  color: white;
+  border: 1.5px solid transparent;
+  background: linear-gradient(135deg, #2a9a47, #1b7f36);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(27, 127, 54, 0.3);
   cursor: pointer;
 }
 
+.botao-perto-toggle::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M3 11.2L21 3l-8.2 18-2.4-7.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.perto-de-mim:has(.perto-config:not([hidden])) .botao-perto-toggle {
+  background: transparent;
+  border-color: var(--marca);
+  color: var(--marca);
+  box-shadow: none;
+}
+
+.perto-de-mim:has(.perto-config:not([hidden])) .botao-perto-toggle::before {
+  display: none;
+}
+
 .perto-config {
-  margin-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--linha);
+}
+
+.perto-tipos-necessarios {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--tinta-suave);
+}
+
+.perto-ajustes summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.perto-ajustes summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Setinha que indica que o toque abre o ajuste de distância. */
+.perto-ajustes summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 3px auto;
+  border-right: 2px solid var(--marca);
+  border-bottom: 2px solid var(--marca);
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.perto-ajustes[open] summary::after {
+  margin: 4px 4px 0 auto;
+  transform: rotate(-135deg);
+}
+
+.perto-raio {
+  margin-top: 10px;
 }
 
 .perto-tipos {
@@ -639,7 +965,7 @@ body {
 .select-raio {
   width: 100%;
   height: 38px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1.5px solid var(--linha);
   background: var(--papel);
   color: var(--tinta);
@@ -651,8 +977,12 @@ body {
 .perto-status {
   font-size: 12.5px;
   color: var(--tinta-suave);
-  margin: 10px 0 6px;
-  min-height: 16px;
+  margin: 10px 0 0;
+  min-height: 0;
+}
+
+.perto-status:not(:empty) {
+  margin-bottom: 6px;
 }
 
 .perto-lista {
@@ -671,7 +1001,7 @@ body {
   align-items: center;
   gap: 10px;
   background: var(--papel);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 8px 10px;
   border: 1px solid var(--linha);
   cursor: pointer;
@@ -715,21 +1045,59 @@ body {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: var(--marca);
+  background: var(--botao);
   color: white;
   font-size: 14px;
   cursor: pointer;
 }
 
-/* --- Botão de comando de voz --- */
+/* --- Botão limpar comprados --- */
+.botao-limpar {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px dashed var(--borda-forte);
+  background: transparent;
+  color: var(--tinta-suave);
+  font-family: var(--fonte-corpo);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* --- Barra de adicionar (fixa, logo acima da barra de navegação) --- */
+.barra-adicionar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--altura-nav) + 8px + env(safe-area-inset-bottom));
+  z-index: 11;
+  width: calc(100% - 20px);
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: var(--papel-alt);
+  border: 1px solid var(--linha);
+  border-radius: 22px;
+  box-shadow: 0 -2px 20px rgba(20, 85, 45, 0.16);
+}
+
+/* O microfone tem o texto trocado pelo voz.js (🎤 / 🔴), então continua
+   sendo emoji; o visual vem só do CSS. */
 .botao-voz {
   flex-shrink: 0;
   width: 46px;
   height: 46px;
-  border-radius: 12px;
-  border: 1.5px solid var(--linha);
+  border-radius: 14px;
+  border: 1.5px solid var(--borda-forte);
   background: var(--papel);
-  font-size: 18px;
+  font-size: 19px;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -744,61 +1112,48 @@ body {
   50% { opacity: 0.5; }
 }
 
-/* --- Botão limpar comprados --- */
-.botao-limpar {
-  display: block;
-  width: 100%;
-  margin-top: 18px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1.5px dashed var(--linha);
-  background: transparent;
-  color: var(--tinta-suave);
-  font-family: var(--fonte-corpo);
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
+.campo-item {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-/* --- Barra de adicionar, fixa embaixo (padrão de app mobile) --- */
-.barra-adicionar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-  background: var(--papel-alt);
-  border-top: 1px solid var(--linha);
-  max-width: 480px;
-  margin: 0 auto;
+.campo-item-icone {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--tinta-suave);
+  pointer-events: none;
 }
 
 .input-item {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 52px;
-  padding: 0 18px;
+  width: 100%;
+  height: 46px;
+  padding: 0 10px 0 36px;
   border-radius: 14px;
-  border: 1.5px solid var(--linha);
+  border: 1.5px solid var(--borda-forte);
   font-family: var(--fonte-corpo);
-  font-size: 16.5px;
-  text-align: center;
+  font-size: 16px;
   color: var(--tinta);
   background: var(--papel);
+  text-overflow: ellipsis;
+}
+
+.input-item::placeholder {
+  color: var(--tinta-suave);
+  font-size: 15px;
 }
 
 .input-item:focus {
   outline: none;
   border-color: var(--marca);
-  text-align: left;
 }
 
-/* Controle de quantidade compacto: número no meio, com uma seta ▲
-   acima (aumenta) e ▼ abaixo (diminui) — empilhadas na vertical, em
-   vez de dois botões −/+ largos lado a lado. */
+/* Controle de quantidade compacto: número no meio, seta ▲ acima (aumenta)
+   e ▼ abaixo (diminui), empilhadas na vertical. */
 .stepper-vertical {
   flex-shrink: 0;
   display: flex;
@@ -806,11 +1161,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  width: 40px;
-  height: 52px;
+  width: 36px;
+  height: 46px;
   background: var(--papel);
-  border: 1.5px solid var(--linha);
-  border-radius: 10px;
+  border: 1.5px solid var(--borda-forte);
+  border-radius: 12px;
   padding: 4px 0;
 }
 
@@ -838,26 +1193,94 @@ body {
 
 .botao-adicionar {
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   border-radius: 14px;
   border: none;
-  background: var(--marca);
+  background: linear-gradient(135deg, var(--botao), var(--botao-2));
   color: white;
-  font-size: 19px;
+  box-shadow: 0 6px 14px rgba(20, 85, 45, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botao-adicionar svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Barra de navegação inferior --- */
+.barra-navegacao {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  max-width: 480px;
+  margin: 0 auto;
+  height: calc(var(--altura-nav) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: linear-gradient(180deg, #2fa561, #1f8a4c);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -6px 20px rgba(60, 5, 20, 0.25);
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--fonte-titulo);
+  font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
 }
 
-/* --- Telas pequenas: encolhe um pouco o stepper para caber --- */
-@media (max-width: 360px) {
-  .stepper-vertical { padding: 0 3px; }
+.nav-item svg {
+  width: 28px;
+  height: 28px;
+}
+
+.nav-item-ativo {
+  color: var(--acento);
+  font-weight: 600;
+}
+
+.nav-item-ativo::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  width: 52px;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--acento);
+}
+
+/* --- Telas pequenas --- */
+@media (max-width: 400px) {
+  .perto-mapa { display: none; }
+  .cabecalho h1 { font-size: 21px; }
+  .cabecalho-cesta { width: 112px; bottom: 26px; }
+  .logo { width: 46px; height: 41px; }
+  .vazio-ilustracao { width: 180px; }
+  .mensagem-vazia-titulo { font-size: 24px; }
 }
 
 /* --- Tela de login (Supabase Auth) --- */
 /* O auth.js troca o atributo data-auth do <body>: "verificando" (checando a
    sessão guardada), "deslogado" (mostra a tela de login) ou "logado" (app). */
 body:not([data-auth="logado"]) .app,
-body:not([data-auth="logado"]) .barra-adicionar {
+body:not([data-auth="logado"]) .barra-adicionar,
+body:not([data-auth="logado"]) .barra-navegacao {
   display: none;
 }
 
@@ -869,7 +1292,9 @@ body:not([data-auth="logado"]) .barra-adicionar {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: var(--papel);
+  background:
+    radial-gradient(420px 300px at 85% 0%, rgba(31, 138, 76, 0.28), transparent 70%),
+    var(--papel);
   overflow-y: auto;
 }
 
@@ -886,20 +1311,34 @@ body[data-auth="deslogado"] .tela-login {
   padding: 28px 22px;
   text-align: center;
   background: var(--papel-alt);
-  border: 1.5px solid var(--linha);
-  border-radius: 18px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--linha);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
 }
 
-.login-icone {
-  font-size: 44px;
+.login-logo {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 4px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1c8248, #45b873);
+  box-shadow: 0 8px 18px rgba(20, 85, 45, 0.3);
+}
+
+.login-logo svg {
+  width: 50px;
+  height: 45px;
 }
 
 .login-caixa h1 {
   margin: 0;
   font-family: var(--fonte-titulo);
   font-size: 24px;
-  color: var(--tinta);
+  font-weight: 700;
+  color: var(--marca);
 }
 
 .login-subtitulo {
@@ -918,13 +1357,12 @@ body[data-auth="deslogado"] .tela-login {
 
 .login-input {
   width: 100%;
-  box-sizing: border-box;
   padding: 12px 14px;
   font: inherit;
   font-size: 16px; /* 16px evita o zoom automático do iPhone ao focar */
   color: var(--tinta);
   background: var(--papel);
-  border: 1.5px solid var(--linha);
+  border: 1.5px solid var(--borda-forte);
   border-radius: 12px;
 }
 
@@ -953,25 +1391,26 @@ body[data-auth="deslogado"] .tela-login {
 
 .login-botao-principal,
 .login-botao-secundario {
-  padding: 12px 14px;
-  font: inherit;
+  padding: 13px 14px;
+  font-family: var(--fonte-titulo);
   font-size: 16px;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: 99px;
   cursor: pointer;
 }
 
 .login-botao-principal {
   margin-top: 12px;
   color: #fff;
-  background: var(--marca);
+  background: linear-gradient(135deg, var(--botao), var(--botao-2));
   border: none;
+  box-shadow: 0 8px 18px rgba(20, 85, 45, 0.28);
 }
 
 .login-botao-secundario {
-  color: var(--tinta);
+  color: var(--marca);
   background: transparent;
-  border: 1.5px solid var(--linha);
+  border: 1.5px solid var(--marca);
 }
 
 .login-caixa button:disabled {
@@ -1007,7 +1446,7 @@ body[data-dados="carregando"] .lista-container {
   background: var(--papel-alt);
   border: 1.5px solid var(--acento);
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .aviso-sync button {
@@ -1016,7 +1455,7 @@ body[data-dados="carregando"] .lista-container {
   font-size: 13px;
   font-weight: 600;
   color: #fff;
-  background: var(--marca);
+  background: var(--botao);
   border: none;
   border-radius: 8px;
   cursor: pointer;

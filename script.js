@@ -84,6 +84,9 @@ const botaoCompartilhar = document.getElementById("botao-compartilhar");
 const botaoTema = document.getElementById("botao-tema");
 const progressoTexto = document.getElementById("progresso-texto");
 const progressoPreenchido = document.getElementById("progresso-preenchido");
+const progressoPercentual = document.getElementById("progresso-percentual");
+const mensagemVaziaTitulo = document.getElementById("mensagem-vazia-titulo");
+const botaoPrimeiroItem = document.getElementById("botao-primeiro-item");
 
 let itens = []; // preenchida por iniciarDados() depois do login
 let categoriasAtivas = carregarCategorias();
@@ -303,7 +306,12 @@ function renderizar() {
 
   if (itensFiltrados.length === 0) {
     mensagemVazia.style.display = "flex";
+    // Lista realmente vazia: título de boas-vindas e botão para o primeiro item.
+    // Busca ou categoria sem resultado: só a mensagem, sem o botão.
+    const listaVazia = itens.length === 0;
+    mensagemVaziaTitulo.textContent = listaVazia ? "Sua lista está vazia!" : "Nada por aqui";
     mensagemVaziaTexto.textContent = mensagemParaListaVazia();
+    botaoPrimeiroItem.hidden = !listaVazia;
   } else {
     mensagemVazia.style.display = "none";
 
@@ -320,7 +328,7 @@ function renderizar() {
 }
 
 function mensagemParaListaVazia() {
-  if (itens.length === 0) return "Sua lista está vazia. Adicione o primeiro item abaixo! 👇";
+  if (itens.length === 0) return "Adicione os itens que você precisa comprar e organize suas compras.";
   if (termoBusca.trim()) return `Nenhum item encontrado para "${termoBusca}".`;
   return "Nenhum item nessa categoria.";
 }
@@ -434,9 +442,10 @@ function criarFormularioEdicao(item) {
 function atualizarProgresso() {
   const total = itens.length;
   const comprados = itens.filter((i) => i.comprado).length;
-  progressoTexto.textContent = `${comprados} de ${total} comprado${total === 1 ? "" : "s"}`;
+  progressoTexto.textContent = `${comprados} de ${total} ${total === 1 ? "item comprado" : "itens comprados"}`;
   const percentual = total === 0 ? 0 : Math.round((comprados / total) * 100);
   progressoPreenchido.style.width = `${percentual}%`;
+  progressoPercentual.textContent = `${percentual}%`;
 }
 
 function atualizarBotaoLimpar() {
@@ -501,7 +510,7 @@ function categoriaParaAdicionar() {
 }
 
 function atualizarPlaceholder() {
-  inputItem.placeholder = `Adicionar em ${nomeCategoria(categoriaParaAdicionar())}...`;
+  inputItem.placeholder = `Adicionar em ${nomeCategoria(categoriaParaAdicionar())}`;
 }
 
 // --- Modo escuro ---

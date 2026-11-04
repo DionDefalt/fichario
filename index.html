@@ -3,19 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#7d0f31" />
   <title>Lista de Compras</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧺</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-auth="verificando" data-dados="carregando">
+  <!-- Ícones e ilustrações do app (SVG próprio), usados com <use href="#id">. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- Logo: carrinho com coração -->
+      <symbol id="ic-logo" viewBox="0 0 64 56">
+        <g fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 14h8l6 24h27l6-20H13"/>
+          <path d="M20 38l2 5h24"/>
+          <path d="M24 18l1 20M32 18v20M40 18l-1 20"/>
+          <circle cx="26" cy="49" r="3.4"/>
+          <circle cx="43" cy="49" r="3.4"/>
+          <path d="M46 4c-2.4-3.2-7.2-2.2-7.9 1.8-.7 3.8 3.6 6.8 7.9 9.8 4.3-3 8.6-6 7.9-9.8C53.2 1.8 48.4.8 46 4z" stroke-width="3"/>
+        </g>
+      </symbol>
+
+      <!-- Cesta com compras (cabeçalho) -->
+      <symbol id="ic-cesta" viewBox="0 0 160 120">
+        <clipPath id="cesta-clip"><path d="M20 62H140L128 114H32Z"/></clipPath>
+        <!-- alface -->
+        <ellipse cx="62" cy="40" rx="24" ry="22" fill="#4c9a3d"/>
+        <ellipse cx="50" cy="34" rx="16" ry="16" fill="#6bbd48"/>
+        <ellipse cx="76" cy="32" rx="17" ry="18" fill="#84cf5c"/>
+        <path d="M52 52c4-8 6-14 6-22M70 50c-2-8 0-16 4-22" stroke="#3c8431" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- leite -->
+        <rect x="98" y="22" width="22" height="42" rx="6" fill="#fff"/>
+        <rect x="103" y="13" width="12" height="12" rx="2" fill="#fff"/>
+        <rect x="102" y="7" width="14" height="8" rx="3" fill="#3d7bd9"/>
+        <rect x="98" y="36" width="22" height="14" fill="#e3edfb"/>
+        <!-- pão -->
+        <g transform="rotate(28 134 42)">
+          <ellipse cx="134" cy="42" rx="11" ry="34" fill="#e3a23c" stroke="#c98324" stroke-width="1.6"/>
+          <path d="M128 22l6 5M128 38l6 5M128 54l6 5" stroke="#f4cd84" stroke-width="2.6" stroke-linecap="round"/>
+        </g>
+        <!-- pimentão amarelo -->
+        <path d="M68 50c0-9 22-9 22 0 2 11-2 22-11 22s-13-11-11-22z" fill="#f4c431"/>
+        <path d="M79 42v-6" stroke="#3c8431" stroke-width="3.4" stroke-linecap="round"/>
+        <!-- frente da cesta -->
+        <path d="M20 62H140L128 114H32Z" fill="#bd7a31"/>
+        <g clip-path="url(#cesta-clip)" stroke="#d9a252" stroke-width="2.2"><path d="M0 74H160M0 87H160M0 100H160M0 112H160"/></g>
+        <g clip-path="url(#cesta-clip)" stroke="#9a5e24" stroke-width="1.6" opacity=".55"><path d="M30 62v52M44 62v52M58 62v52M72 62v52M86 62v52M100 62v52M114 62v52M128 62v52"/></g>
+        <rect x="14" y="55" width="132" height="11" rx="5.5" fill="#d9a649"/>
+        <rect x="17" y="57" width="126" height="3" rx="1.5" fill="#f1cd7a" opacity=".85"/>
+        <!-- tomate -->
+        <circle cx="114" cy="66" r="13" fill="#d6342b"/>
+        <ellipse cx="109" cy="61" rx="4" ry="2.6" fill="#fff" opacity=".35"/>
+        <path d="M114 53l-5 3 5 1 5-1z" fill="#3c8431"/>
+        <!-- uvas -->
+        <g fill="#7a2f86">
+          <circle cx="32" cy="70" r="7.5"/><circle cx="45" cy="72" r="7.5"/>
+          <circle cx="38" cy="82" r="7.5"/><circle cx="26" cy="82" r="7.5"/><circle cx="50" cy="84" r="7"/>
+        </g>
+        <g fill="#a35bb0" opacity=".8">
+          <circle cx="29" cy="67" r="2.2"/><circle cx="42" cy="69" r="2.2"/><circle cx="35" cy="79" r="2.2"/>
+        </g>
+        <path d="M38 62c0-6 4-8 8-9" stroke="#3c8431" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      </symbol>
+
+      <!-- Carrinho cheio (estado vazio) -->
+      <symbol id="ic-carrinho" viewBox="0 0 260 210">
+        <clipPath id="carrinho-clip"><path d="M50 92H214L196 152H70Z"/></clipPath>
+        <ellipse cx="124" cy="112" rx="104" ry="84" fill="#f9d9d8" opacity=".65"/>
+        <ellipse cx="132" cy="200" rx="86" ry="6" fill="#000" opacity=".08"/>
+        <!-- sparkles -->
+        <path d="M40 46l18 10M58 28l8 16M26 70l20 2" stroke="#f2b705" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M30 90l16-3" stroke="#d1202f" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- alface -->
+        <ellipse cx="90" cy="76" rx="30" ry="26" fill="#4b9a3c"/>
+        <ellipse cx="76" cy="68" rx="20" ry="19" fill="#69bb47"/>
+        <ellipse cx="104" cy="64" rx="21" ry="21" fill="#86d05c"/>
+        <path d="M76 84c6-10 8-18 8-28M98 80c-2-10 0-20 6-30" stroke="#3b8330" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <!-- pão -->
+        <g transform="rotate(24 152 68)">
+          <ellipse cx="152" cy="68" rx="15" ry="46" fill="#e7a63d" stroke="#c98324" stroke-width="2"/>
+          <path d="M143 42l9 7M143 60l9 7M143 78l9 7" stroke="#f6cf84" stroke-width="3.2" stroke-linecap="round"/>
+        </g>
+        <!-- leite -->
+        <rect x="172" y="54" width="30" height="52" rx="7" fill="#fff" stroke="#dfe5ee" stroke-width="2"/>
+        <rect x="178" y="42" width="18" height="16" rx="3" fill="#fff" stroke="#dfe5ee" stroke-width="2"/>
+        <rect x="177" y="33" width="20" height="11" rx="3" fill="#3d7bd9"/>
+        <rect x="172" y="72" width="30" height="18" fill="#e6effb"/>
+        <!-- queijo -->
+        <path d="M118 106L172 88l4 22Z" fill="#f7c948"/>
+        <path d="M118 106L172 88l-2 6-48 16Z" fill="#fbdc7a"/>
+        <circle cx="146" cy="104" r="3" fill="#e5ac2c"/><circle cx="160" cy="102" r="2.2" fill="#e5ac2c"/>
+        <!-- tomates -->
+        <circle cx="94" cy="98" r="16" fill="#d8322b"/>
+        <circle cx="124" cy="102" r="14" fill="#e2463a"/>
+        <ellipse cx="88" cy="92" rx="5" ry="3" fill="#fff" opacity=".35"/>
+        <path d="M94 83l-6 4 6 1 6-1z" fill="#3b8330"/>
+        <!-- banana -->
+        <path d="M54 90c16 16 38 16 54 4" stroke="#f3c531" stroke-width="11" stroke-linecap="round" fill="none"/>
+        <path d="M54 90l-3-4" stroke="#8a5a1c" stroke-width="5" stroke-linecap="round"/>
+        <!-- frente do carrinho -->
+        <path d="M50 92H214L196 152H70Z" fill="#ffffff" fill-opacity=".38" stroke="#a8adb5" stroke-width="5" stroke-linejoin="round"/>
+        <g clip-path="url(#carrinho-clip)" stroke="#b9bdc4" stroke-width="3">
+          <path d="M70 92v60M92 92v60M114 92v60M136 92v60M158 92v60M180 92v60M202 92v60M40 112H230M40 132H230"/>
+        </g>
+        <path d="M214 92L230 58H250" stroke="#c0182f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M72 152L84 176H190L198 152" stroke="#a8adb5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="98" cy="190" r="11" fill="#2d2d31"/><circle cx="98" cy="190" r="4.5" fill="#bfc3c9"/>
+        <circle cx="176" cy="190" r="11" fill="#2d2d31"/><circle cx="176" cy="190" r="4.5" fill="#bfc3c9"/>
+        <path d="M98 176v3M176 176v3" stroke="#a8adb5" stroke-width="4"/>
+        <!-- coração -->
+        <path d="M232 112s-13.3-8.3-18-16.2c-3.8-6.6.4-14 7-14 3.8 0 6.8 2.1 11 6.1 4.2-4 7.2-6.1 11-6.1 6.6 0 10.8 7.4 7 14-4.7 7.9-18 16.2-18 16.2z" transform="translate(-6 24) rotate(8 232 100)" fill="none" stroke="#c0182f" stroke-width="3.2" stroke-linejoin="round"/>
+      </symbol>
+
+      <!-- Mapa dobrado com rota e marcador (cartão "Perto de mim") -->
+      <symbol id="ic-mapa" viewBox="0 0 72 54">
+        <path d="M4 18L22 12 40 18 58 12V46L40 52 22 46 4 52Z" fill="#fbefe0" stroke="#e1c9a6" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M22 12v34M40 18v34" stroke="#e1c9a6" stroke-width="1.4"/>
+        <path d="M12 42c8-14 18 2 26-10s10-6 12-6" stroke="#d1202f" stroke-width="2" stroke-dasharray="3 3" fill="none" stroke-linecap="round"/>
+        <path d="M52 6c-4.4 0-8 3.4-8 7.6C44 19 52 28 52 28s8-9 8-14.4C60 9.4 56.4 6 52 6z" fill="#d1202f"/>
+        <circle cx="52" cy="13.6" r="3" fill="#fff"/>
+      </symbol>
+
+      <!-- Ícones de interface -->
+      <symbol id="ic-pin" viewBox="0 0 24 24">
+        <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z" fill="currentColor"/>
+        <circle cx="12" cy="9" r="2.7" fill="#fff"/>
+      </symbol>
+      <symbol id="ic-prancheta" viewBox="0 0 48 48">
+        <g fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="8" width="30" height="34" rx="5"/>
+          <rect x="17" y="4" width="14" height="9" rx="3" fill="var(--papel-alt)"/>
+          <path d="M16 23l3 3 5-6M28 23h6M16 34l3 3 5-6M28 34h6"/>
+        </g>
+      </symbol>
+      <symbol id="ic-lupa" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>
+        </g>
+      </symbol>
+      <symbol id="ic-lapis" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13.5 6.5l4 4"/>
+        </g>
+      </symbol>
+      <symbol id="ic-mais" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="ic-seta-curva" viewBox="0 0 40 44">
+        <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M30 4C14 6 8 18 14 34"/><path d="M6 28l8 8 8-8"/>
+        </g>
+      </symbol>
+      <symbol id="ic-nav-lista" viewBox="0 0 28 28">
+        <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11h22l-2.4 11H5.4z"/><path d="M9 11l4-7M19 11l-4-7"/><path d="M10 14.5v4.5M14 14.5v4.5M18 14.5v4.5"/>
+        </g>
+      </symbol>
+      <symbol id="ic-nav-categorias" viewBox="0 0 28 28">
+        <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+          <rect x="4" y="4" width="8.5" height="8.5" rx="2.2"/><rect x="15.5" y="4" width="8.5" height="8.5" rx="2.2"/>
+          <rect x="4" y="15.5" width="8.5" height="8.5" rx="2.2"/><rect x="15.5" y="15.5" width="8.5" height="8.5" rx="2.2"/>
+        </g>
+      </symbol>
+      <symbol id="ic-nav-mais" viewBox="0 0 28 28">
+        <g fill="currentColor"><circle cx="5" cy="14" r="2.5"/><circle cx="14" cy="14" r="2.5"/><circle cx="23" cy="14" r="2.5"/></g>
+      </symbol>
+    </defs>
+  </svg>
+
   <!-- Tela de entrada (Supabase Auth). O CSS mostra esta tela ou o app
        conforme o atributo data-auth do <body>, controlado pelo auth.js. -->
   <div class="tela-login" id="tela-login">
     <form class="login-caixa" id="form-login" novalidate>
-      <div class="login-icone">🧺</div>
+      <div class="login-logo"><svg aria-hidden="true"><use href="#ic-logo"/></svg></div>
       <h1>Lista de Compras</h1>
       <p class="login-subtitulo">Entre ou crie uma conta para guardar suas listas.</p>
 
@@ -40,32 +203,55 @@
 
   <div class="app">
     <header class="cabecalho">
-      <div class="cabecalho-titulo">
-        <h1>🧺 Lista de Compras</h1>
-        <div class="cabecalho-acoes">
-          <button class="botao-icone" id="botao-compartilhar" aria-label="Compartilhar lista" hidden>📤</button>
-          <button class="botao-icone" id="botao-tema" aria-label="Alternar modo escuro">🌙</button>
-          <button class="botao-icone" id="botao-sair" aria-label="Sair da conta" title="Sair">🚪</button>
+      <div class="cabecalho-marca">
+        <svg class="logo" aria-hidden="true"><use href="#ic-logo"/></svg>
+        <div class="cabecalho-texto">
+          <h1>Lista de Compras</h1>
+          <p class="cabecalho-subtitulo">Organize suas compras com praticidade!</p>
+          <svg class="cabecalho-traco" viewBox="0 0 120 10" aria-hidden="true"><path d="M2 7C30 1 70 1 118 5" fill="none" stroke="#e8b84d" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
       </div>
-      <div class="progresso" id="progresso">
-        <div class="progresso-texto" id="progresso-texto">0 de 0 comprados</div>
-        <div class="progresso-barra">
-          <div class="progresso-preenchido" id="progresso-preenchido"></div>
+      <button class="botao-tema" id="botao-tema" aria-label="Alternar modo escuro">🌙</button>
+      <img class="cabecalho-cesta" src="imagens/cesta.png" alt="" width="900" height="767" />
+      <svg class="cabecalho-onda" viewBox="0 0 480 44" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="ouro-onda" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#b9852b"/><stop offset=".5" stop-color="#f3d57f"/><stop offset="1" stop-color="#c99636"/>
+          </linearGradient>
+        </defs>
+        <path class="onda-fundo" d="M0 22C70 2 150 0 240 16S410 36 480 10V44H0Z"/>
+        <path d="M0 22C70 2 150 0 240 16S410 36 480 10" fill="none" stroke="url(#ouro-onda)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+      </svg>
+    </header>
+
+    <section class="cartao cartao-progresso" id="progresso">
+      <img class="progresso-icone" src="imagens/progresso.png" alt="" width="420" height="589" />
+      <div class="progresso-corpo">
+        <div class="progresso-titulo">Progresso da Lista</div>
+        <div class="progresso-texto" id="progresso-texto">0 de 0 itens comprados</div>
+        <div class="progresso-linha">
+          <div class="progresso-barra">
+            <div class="progresso-preenchido" id="progresso-preenchido"></div>
+          </div>
+          <span class="progresso-percentual" id="progresso-percentual">0%</span>
         </div>
       </div>
+    </section>
+
+    <div class="busca">
+      <svg class="busca-icone" aria-hidden="true"><use href="#ic-lupa"/></svg>
       <input
         type="search"
         id="input-busca"
         class="input-busca"
-        placeholder="🔎 Buscar item..."
+        placeholder="Buscar item na lista..."
         autocomplete="off"
       />
-    </header>
+    </div>
 
     <div class="filtros" id="filtros"></div>
 
-    <!-- Modal do catálogo de categorias — abre ao tocar no "+" dos filtros -->
+    <!-- Modal do catálogo de categorias — abre ao tocar em "+ Categoria" ou em "Categorias" na barra inferior -->
     <div class="modal-fundo" id="modal-categorias" hidden>
       <div class="modal-caixa">
         <div class="modal-topo">
@@ -77,22 +263,50 @@
       </div>
     </div>
 
-    <section class="perto-de-mim" id="perto-de-mim">
+    <!-- Menu "Mais" (barra inferior): compartilhar e sair -->
+    <div class="modal-fundo" id="modal-mais" hidden>
+      <div class="modal-caixa">
+        <div class="modal-topo">
+          <h2>Mais</h2>
+          <button class="botao-icone" id="botao-fechar-mais" aria-label="Fechar">✕</button>
+        </div>
+        <p class="modal-dica" id="mais-usuario"></p>
+        <div class="mais-lista">
+          <button type="button" class="mais-item" id="botao-compartilhar" hidden>
+            <span class="mais-icone">📤</span> Compartilhar lista
+          </button>
+          <button type="button" class="mais-item mais-item-sair" id="botao-sair">
+            <span class="mais-icone">🚪</span> Sair da conta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <section class="cartao perto-de-mim" id="perto-de-mim">
       <div class="perto-cabecalho">
-        <h2>📍 Perto de mim</h2>
+        <img class="perto-pin" src="imagens/pino.png" alt="" width="240" height="345" />
+        <div class="perto-textos">
+          <h2>Perto de mim</h2>
+          <p>Encontre lugares próximos de você</p>
+        </div>
+        <img class="perto-mapa" src="imagens/mapa.png" alt="" width="700" height="472" />
         <button class="botao-perto-toggle" id="botao-perto-toggle">Desativar</button>
       </div>
 
       <div class="perto-config" id="perto-config">
-        <p class="perto-tipos-necessarios" id="perto-tipos-necessarios">
-          Nenhum item pendente na lista — nada para buscar ainda.
-        </p>
-        <label for="select-raio">Avisar quando estiver a menos de:</label>
-        <select id="select-raio" class="select-raio">
-          <option value="200">200 m</option>
-          <option value="500" selected>500 m</option>
-          <option value="1000">1 km</option>
-        </select>
+        <details class="perto-ajustes">
+          <summary>
+            <span class="perto-tipos-necessarios" id="perto-tipos-necessarios">Nenhum item pendente na lista — nada para buscar ainda.</span>
+          </summary>
+          <div class="perto-raio">
+            <label for="select-raio">Avisar quando estiver a menos de:</label>
+            <select id="select-raio" class="select-raio">
+              <option value="200">200 m</option>
+              <option value="500" selected>500 m</option>
+              <option value="1000">1 km</option>
+            </select>
+          </div>
+        </details>
       </div>
 
       <p class="perto-status" id="perto-status"></p>
@@ -102,8 +316,13 @@
     <main class="lista-container">
       <ul class="lista" id="lista"></ul>
       <div class="mensagem-vazia" id="mensagem-vazia">
-        <div class="mensagem-vazia-icone">🧺</div>
-        <p class="mensagem-vazia-texto" id="mensagem-vazia-texto">Sua lista está vazia. Adicione o primeiro item abaixo! 👇</p>
+        <img class="vazio-ilustracao" src="imagens/carrinho.png" alt="" width="800" height="872" />
+        <h2 class="mensagem-vazia-titulo" id="mensagem-vazia-titulo">Sua lista está vazia!</h2>
+        <p class="mensagem-vazia-texto" id="mensagem-vazia-texto">Adicione os itens que você precisa comprar e organize suas compras.</p>
+        <svg class="vazio-seta" aria-hidden="true"><use href="#ic-seta-curva"/></svg>
+        <button type="button" class="botao-primeiro-item" id="botao-primeiro-item">
+          <svg aria-hidden="true"><use href="#ic-mais"/></svg> Adicionar primeiro item
+        </button>
       </div>
     </main>
 
@@ -112,26 +331,42 @@
 
   <form class="barra-adicionar" id="form-adicionar">
     <button type="button" class="botao-voz" id="botao-voz" aria-label="Adicionar por voz">🎤</button>
-    <input
-      type="text"
-      id="input-item"
-      class="input-item"
-      placeholder="Adicionar em Outros..."
-      autocomplete="off"
-      required
-    />
+    <div class="campo-item">
+      <svg class="campo-item-icone" aria-hidden="true"><use href="#ic-lapis"/></svg>
+      <input
+        type="text"
+        id="input-item"
+        class="input-item"
+        placeholder="Adicionar em Outros..."
+        autocomplete="off"
+        required
+      />
+    </div>
     <div class="stepper-vertical">
       <button type="button" class="stepper-seta" id="qtd-mais" aria-label="Aumentar quantidade">▲</button>
       <span class="stepper-valor" id="qtd-valor">1</span>
       <button type="button" class="stepper-seta" id="qtd-menos" aria-label="Diminuir quantidade">▼</button>
     </div>
-    <button type="submit" class="botao-adicionar" aria-label="Adicionar">➕</button>
+    <button type="submit" class="botao-adicionar" aria-label="Adicionar"><svg aria-hidden="true"><use href="#ic-mais"/></svg></button>
   </form>
+
+  <nav class="barra-navegacao" aria-label="Navegação principal">
+    <button type="button" class="nav-item nav-item-ativo" id="nav-lista" aria-current="page">
+      <svg aria-hidden="true"><use href="#ic-nav-lista"/></svg><span>Lista</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-categorias">
+      <svg aria-hidden="true"><use href="#ic-nav-categorias"/></svg><span>Categorias</span>
+    </button>
+    <button type="button" class="nav-item" id="nav-mais">
+      <svg aria-hidden="true"><use href="#ic-nav-mais"/></svg><span>Mais</span>
+    </button>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
   <script src="dados.js"></script>
   <script src="script.js"></script>
+  <script src="navegacao.js"></script>
   <script src="proximidade.js"></script>
   <script src="voz.js"></script>
 </body>
